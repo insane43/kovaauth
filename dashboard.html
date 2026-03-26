@@ -57,13 +57,8 @@
                 <h1 class="page-title">Dashboard</h1>
             </div>
             <div class="topbar-right">
-                <div class="premium-badge">
-                    <div class="premium-icon">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                        </svg>
-                    </div>
-                    <span>PREMIUM</span>
+                <div class="premium-badge free-badge">
+                    <span>FREE</span>
                 </div>
             </div>
         </div>
@@ -418,154 +413,194 @@
 
             <!-- ========== WEBHOOK TAB ========== -->
             <div class="tab-content" id="webhook-tab" style="display:none;">
-                <div class="webhook-container">
-                    <!-- Configuration Panel -->
-                    <div class="webhook-config-panel">
-                        <div class="panel">
-                            <div class="panel-header">
-                                <h2>Webhook Configuration</h2>
-                                <div class="webhook-status-indicator" id="webhookStatusIndicator">
-                                    <div class="status-dot status-offline"></div>
-                                    <span>Not Configured</span>
+                <div class="webhook-grid">
+                    <!-- Configuration Card -->
+                    <div class="webhook-card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="title-icon">
+                                    <i data-lucide="settings"></i>
+                                </div>
+                                <div>
+                                    <h2>Configuration</h2>
+                                    <p>Set up your Discord webhook URL</p>
                                 </div>
                             </div>
-                            <div class="webhook-url-section">
-                                <label class="webhook-label">Discord Webhook URL</label>
-                                <div class="webhook-url-input-group">
-                                    <input type="text" id="webhookUrlInput" placeholder="https://discord.com/api/webhooks/..." class="webhook-url-input">
-                                    <button onclick="saveWebhook()" class="btn-primary">
-                                        <i data-lucide="save"></i> Save
-                                    </button>
-                                    <button onclick="testWebhook()" class="btn-secondary-sm">
-                                        <i data-lucide="send"></i> Test
-                                    </button>
-                                    <button onclick="removeWebhook()" class="btn-danger-sm">
-                                        <i data-lucide="trash-2"></i>
-                                    </button>
-                                </div>
-                                <div id="webhookStatus" class="webhook-status-msg"></div>
+                            <div class="webhook-status" id="webhookStatusBadge">
+                                <div class="status-dot status-offline"></div>
+                                <span>Disconnected</span>
                             </div>
                         </div>
-
-                        <!-- Embed Customization -->
-                        <div class="panel" style="margin-top:1.5rem;">
-                            <div class="panel-header">
-                                <h2>Embed Appearance</h2>
-                                <div class="header-actions">
-                                    <button onclick="resetWebhookCustomization()" class="btn-secondary-sm">
-                                        <i data-lucide="refresh-cw"></i> Reset to Default
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Event Type Selector -->
-                            <div class="event-selector-container">
-                                <div class="event-selector-tabs">
-                                    <button class="event-tab active" data-event="creation" onclick="selectEventTab('creation')">
-                                        <span class="event-emoji">🔑</span>
-                                        <span>Created</span>
-                                    </button>
-                                    <button class="event-tab" data-event="activation" onclick="selectEventTab('activation')">
-                                        <span class="event-emoji">✅</span>
-                                        <span>Activated</span>
-                                    </button>
-                                    <button class="event-tab" data-event="expiry" onclick="selectEventTab('expiry')">
-                                        <span class="event-emoji">⏰</span>
-                                        <span>Expired</span>
-                                    </button>
-                                    <button class="event-tab" data-event="deletion" onclick="selectEventTab('deletion')">
-                                        <span class="event-emoji">🗑️</span>
-                                        <span>Deleted</span>
-                                    </button>
-                                    <button class="event-tab" data-event="app" onclick="selectEventTab('app')">
-                                        <span class="event-emoji">📦</span>
-                                        <span>Application</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Customization Form -->
-                            <div class="customization-form">
-                                <div class="form-section">
-                                    <div class="form-header">
-                                        <h3 id="selectedEventTitle">License Created</h3>
-                                    </div>
-                                    
-                                    <div class="form-grid">
-                                        <div class="form-group">
-                                            <label class="form-label">
-                                                <i data-lucide="sparkles"></i>
-                                                Icon
-                                            </label>
-                                            <div class="icon-picker">
-                                                <input type="text" id="creationIcon" value="🔑" maxlength="2" class="icon-input" oninput="updatePreview()">
-                                                <div class="icon-suggestions">
-                                                    <span onclick="setIcon('🔑')">🔑</span>
-                                                    <span onclick="setIcon('✨')">✨</span>
-                                                    <span onclick="setIcon('🎉')">🎉</span>
-                                                    <span onclick="setIcon('🚀')">🚀</span>
-                                                    <span onclick="setIcon('💎')">💎</span>
-                                                    <span onclick="setIcon('⚡')">⚡</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="form-label">
-                                                <i data-lucide="type"></i>
-                                                Title
-                                            </label>
-                                            <input type="text" id="creationTitle" value="License Created" class="form-input" oninput="updatePreview()">
-                                        </div>
-
-                                        <div class="form-group full-width">
-                                            <label class="form-label">
-                                                <i data-lucide="message-square"></i>
-                                                Footer Text
-                                            </label>
-                                            <input type="text" id="creationFooter" value="Kova Auth" class="form-input" oninput="updatePreview()">
+                        
+                        <div class="card-content">
+                            <div class="url-setup">
+                                <div class="input-group">
+                                    <label class="input-label">
+                                        <i data-lucide="link"></i>
+                                        Discord Webhook URL
+                                    </label>
+                                    <div class="input-wrapper">
+                                        <input type="text" id="webhookUrlInput" placeholder="https://discord.com/api/webhooks/..." class="webhook-input">
+                                        <div class="input-actions">
+                                            <button onclick="testWebhook()" class="action-btn test" title="Test Webhook">
+                                                <i data-lucide="send"></i>
+                                            </button>
+                                            <button onclick="saveWebhook()" class="action-btn save" title="Save Webhook">
+                                                <i data-lucide="check"></i>
+                                            </button>
+                                            <button onclick="removeWebhook()" class="action-btn remove" title="Remove Webhook">
+                                                <i data-lucide="trash-2"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
+                                <div id="webhookStatus" class="status-message"></div>
                             </div>
 
-                            <div class="webhook-actions">
-                                <button onclick="saveWebhookCustomization()" class="btn-primary">
-                                    <i data-lucide="save"></i> Save Customization
-                                </button>
-                                <button onclick="previewAllEmbeds()" class="btn-secondary">
-                                    <i data-lucide="eye"></i> Preview All
-                                </button>
+                            <div class="quick-stats">
+                                <div class="stat-item">
+                                    <div class="stat-icon">
+                                        <i data-lucide="message-square"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <span class="stat-value" id="webhookSentCount">0</span>
+                                        <span class="stat-label">Messages Sent</span>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-icon">
+                                        <i data-lucide="clock"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <span class="stat-value" id="webhookLastSent">Never</span>
+                                        <span class="stat-label">Last Sent</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Preview Panel -->
-                    <div class="webhook-preview-panel">
-                        <div class="panel">
-                            <div class="panel-header">
-                                <h2>Live Preview</h2>
-                                <div class="preview-controls">
-                                    <label class="switch">
-                                        <input type="checkbox" id="darkModeToggle" checked>
-                                        <span class="slider"></span>
-                                    </label>
-                                    <span style="font-size:0.75rem;color:#888;">Dark Mode</span>
+                    <!-- Customization Card -->
+                    <div class="webhook-card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="title-icon">
+                                    <i data-lucide="palette"></i>
+                                </div>
+                                <div>
+                                    <h2>Message Customization</h2>
+                                    <p>Personalize your Discord notifications</p>
                                 </div>
                             </div>
-                            <div class="discord-preview" id="discordPreview">
-                                <div class="discord-message">
-                                    <div class="discord-avatar">
-                                        <i data-lucide="webhook"></i>
+                            <button onclick="resetWebhookCustomization()" class="reset-btn">
+                                <i data-lucide="refresh-cw"></i>
+                                Reset
+                            </button>
+                        </div>
+                        
+                        <div class="card-content">
+                            <!-- Event Type Selector -->
+                            <div class="event-tabs">
+                                <button class="event-tab active" data-event="creation" onclick="selectEventTab('creation')">
+                                    <span class="tab-icon">🔑</span>
+                                    <span>Created</span>
+                                </button>
+                                <button class="event-tab" data-event="activation" onclick="selectEventTab('activation')">
+                                    <span class="tab-icon">✅</span>
+                                    <span>Activated</span>
+                                </button>
+                                <button class="event-tab" data-event="expiry" onclick="selectEventTab('expiry')">
+                                    <span class="tab-icon">⏰</span>
+                                    <span>Expired</span>
+                                </button>
+                                <button class="event-tab" data-event="deletion" onclick="selectEventTab('deletion')">
+                                    <span class="tab-icon">🗑️</span>
+                                    <span>Deleted</span>
+                                </button>
+                                <button class="event-tab" data-event="app" onclick="selectEventTab('app')">
+                                    <span class="tab-icon">📦</span>
+                                    <span>Application</span>
+                                </button>
+                            </div>
+
+                            <div class="customization-form">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i data-lucide="smile"></i>
+                                        Icon
+                                    </label>
+                                    <div class="icon-picker">
+                                        <input type="text" id="creationIcon" value="🔑" maxlength="2" class="form-input" oninput="updatePreview()">
+                                        <div class="icon-suggestions">
+                                            <span onclick="setIcon('🔑')">🔑</span>
+                                            <span onclick="setIcon('✨')">✨</span>
+                                            <span onclick="setIcon('🎉')">🎉</span>
+                                            <span onclick="setIcon('🚀')">🚀</span>
+                                            <span onclick="setIcon('💎')">💎</span>
+                                            <span onclick="setIcon('⚡')">⚡</span>
+                                        </div>
                                     </div>
-                                    <div class="discord-content">
-                                        <div class="discord-header">
-                                            <span class="discord-username">Kova Auth</span>
-                                            <span class="discord-timestamp">Today at 6:20 PM</span>
-                                        </div>
-                                        <div class="discord-embeds" id="embedPreview">
-                                            <!-- Preview embeds will be inserted here -->
-                                        </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i data-lucide="type"></i>
+                                        Title
+                                    </label>
+                                    <input type="text" id="creationTitle" value="License Created" class="form-input" oninput="updatePreview()">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i data-lucide="tag"></i>
+                                        Footer
+                                    </label>
+                                    <input type="text" id="creationFooter" value="Kova Auth" class="form-input" oninput="updatePreview()">
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button onclick="saveWebhookCustomization()" class="primary-btn">
+                                    Save Customization
+                                </button>
+                                <button onclick="previewAllEmbeds()" class="secondary-btn">
+                                    Preview All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Preview Section -->
+                <div class="preview-section">
+                    <div class="preview-header">
+                        <div class="preview-title">
+                            <div class="title-icon">
+                                <i data-lucide="monitor"></i>
+                            </div>
+                            <div>
+                                <h2>Live Preview</h2>
+                                <p>See how your messages will appear in Discord</p>
+                            </div>
+                        </div>
+                        <div class="preview-controls">
+                            <button onclick="refreshPreview()" class="refresh-btn">
+                                <i data-lucide="refresh-cw"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-container">
+                        <div class="discord-preview" id="discordPreview">
+                            <div class="discord-message">
+                                <div class="discord-avatar">
+                                    <i data-lucide="webhook"></i>
+                                </div>
+                                <div class="discord-content">
+                                    <div class="discord-header">
+                                        <span class="discord-username">Kova Auth</span>
+                                        <span class="discord-timestamp">Today at 4:20 PM</span>
+                                    </div>
+                                    <div class="discord-embeds" id="embedPreview">
+                                        <!-- Preview embeds will be inserted here -->
                                     </div>
                                 </div>
                             </div>
@@ -596,10 +631,6 @@
                         </div>
                     </div>
                     <div class="settings-grid">
-                        <div class="settings-field">
-                            <label>Username</label>
-                            <div class="settings-value" id="settingsUsername">—</div>
-                        </div>
                         <div class="settings-field">
                             <label>Email</label>
                             <div class="settings-value privacy-sensitive" id="settingsEmail">—</div>
@@ -958,6 +989,28 @@
 
     <!-- Blacklist IP Modal removed -->
 
+    <!-- Username Edit Dialog -->
+    <div id="usernameDialog" class="dialog-overlay" style="display: none;">
+        <div class="dialog">
+            <div class="dialog-header">
+                <h3>Edit Username</h3>
+                <button onclick="closeUsernameDialog()" class="dialog-close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="dialog-content">
+                <label for="newUsername">New Username</label>
+                <input type="text" id="newUsername" class="dialog-input" placeholder="Enter new username" maxlength="20">
+                <div class="dialog-hint">3-20 characters, letters, numbers, and underscores only</div>
+                <div id="usernameError" class="dialog-error" style="display: none;"></div>
+            </div>
+            <div class="dialog-actions">
+                <button onclick="closeUsernameDialog()" class="btn-secondary">Cancel</button>
+                <button onclick="saveUsernameFromDialog()" class="btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -1040,15 +1093,15 @@
             document.getElementById('userName').textContent = userProfile.username;
             const isPremium = userProfile.plan === 'premium';
             document.getElementById('userPlan').textContent = isPremium ? 'Premium Plan' : 'Free Plan';
-            const planBadge = document.getElementById('planBadge');
+            const planBadge = document.querySelector('.premium-badge');
             planBadge.textContent = isPremium ? 'PREMIUM' : 'FREE';
             if (isPremium) {
-                planBadge.classList.add('premium');
+                planBadge.classList.remove('free-badge');
             } else {
-                planBadge.classList.remove('premium');
+                planBadge.classList.add('free-badge');
             }
-            document.getElementById('maxLicenses').textContent = isPremium ? '∞' : userProfile.licenseLimit;
-            document.getElementById('licCountMax').textContent = isPremium ? '∞' : userProfile.licenseLimit;
+            document.getElementById('maxLicenses').textContent = isPremium ? 'None' : userProfile.licenseLimit;
+            document.getElementById('licCountMax').textContent = isPremium ? 'None' : userProfile.licenseLimit;
             document.getElementById('dashOwnerId').textContent = userProfile.ownerId;
         }
 
@@ -2157,18 +2210,7 @@ int main() {
             document.getElementById('creationTitle').value = custom.title;
             document.getElementById('creationFooter').value = custom.footer;
             
-            // Update header
-            const titles = {
-                creation: 'License Created',
-                activation: 'License Activated', 
-                expiry: 'License Expired',
-                deletion: 'Deleted',
-                app: 'Application'
-            };
-            document.getElementById('selectedEventTitle').textContent = titles[eventType] || eventType;
-            
-                        
-            // Update preview
+            // Update preview immediately
             updatePreview();
         };
 
@@ -2178,9 +2220,12 @@ int main() {
         };
 
         window.updatePreview = function() {
+            console.log('updatePreview called for event:', currentEventTab);
             const icon = document.getElementById('creationIcon').value;
             const title = document.getElementById('creationTitle').value;
             const footer = document.getElementById('creationFooter').value;
+            
+            console.log('Values:', { icon, title, footer });
             
             // Update current event customization
             webhookCustomization[currentEventTab] = { icon, title, footer };
@@ -2190,12 +2235,17 @@ int main() {
                 type: currentEventTab,
                 text: currentEventTab === 'app' 
                     ? `Application <strong>MyApp</strong> created`
-                    : `License <strong>ABC123-DEF...</strong> ${currentEventTab === 'creation' ? 'created' : currentEventTab === 'activation' ? 'activated' : currentEventTab === 'expiry' ? 'expired' : 'deleted'} for <strong>MyApp</strong>`,
+                    : `License <strong>ABC123-DEF...</strong> ${currentEventTab === 'creation' ? 'created' : currentEventTab === 'activation' ? 'activated' : currentEventTab === 'expiry' ? 'expired' : currentEventTab === 'deletion' ? 'deleted' : 'modified'} for <strong>MyApp</strong>`,
                 detail: currentEventTab === 'app' ? 'Version: 1.0' : 'Type: Premium',
                 time: Date.now()
             };
             
+            console.log('Calling renderDiscordPreview with:', sampleEvent);
             renderDiscordPreview([sampleEvent]);
+        };
+
+        window.refreshPreview = function() {
+            updatePreview();
         };
 
         window.saveWebhookCustomization = async function() {
@@ -2235,21 +2285,49 @@ int main() {
             const sampleEvents = [
                 { type: 'creation', text: 'License <strong>ABC123-DEF...</strong> created for <strong>MyApp</strong>', detail: 'Type: Premium', time: Date.now() },
                 { type: 'activation', text: 'License <strong>ABC123-DEF...</strong> activated on device <strong>A1B2C3D4...</strong>', detail: 'MyApp', time: Date.now() },
-                { type: 'expiry', text: 'License <strong>ABC123-DEF...</strong> expired', detail: 'MyApp', time: Date.now() },
+                { type: 'expiry', text: 'License <strong>ABC123-DEF...</strong> has expired', detail: 'MyApp', time: Date.now() },
                 { type: 'deletion', text: 'License <strong>ABC123-DEF...</strong> deleted', detail: 'MyApp', time: Date.now() },
                 { type: 'app', text: 'Application <strong>MyApp</strong> created', detail: 'Version: 1.0', time: Date.now() }
             ];
-            
             renderDiscordPreview(sampleEvents);
         };
 
+        window.refreshPreview = function() {
+            updatePreview();
+        };
+
+        // Add event listeners for live preview
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add input listeners for live preview
+            const iconInput = document.getElementById('creationIcon');
+            const titleInput = document.getElementById('creationTitle');
+            const footerInput = document.getElementById('creationFooter');
+            
+            if (iconInput) iconInput.addEventListener('input', updatePreview);
+            if (titleInput) titleInput.addEventListener('input', updatePreview);
+            if (footerInput) footerInput.addEventListener('input', updatePreview);
+        });
+
         function renderDiscordPreview(events) {
+            console.log('renderDiscordPreview called with events:', events);
             const preview = document.getElementById('embedPreview');
-            const isDarkMode = document.getElementById('darkModeToggle').checked;
+            
+            console.log('Preview element:', preview);
+            
+            if (!preview) {
+                console.error('embedPreview element not found!');
+                return;
+            }
+            
+            // Always use dark mode
+            const previewContainer = document.getElementById('discordPreview');
+            previewContainer.classList.remove('light-mode');
             
             preview.innerHTML = events.map(ev => {
                 const custom = webhookCustomization[ev.type] || { icon: '📋', title: ev.type, footer: 'Kova Auth' };
                 const desc = ev.text.replace(/<strong>/g, '**').replace(/<\/strong>/g, '**').replace(/<[^>]+>/g, '');
+                
+                console.log('Rendering embed for type:', ev.type, 'with custom:', custom);
                 
                 return `
                     <div class="discord-embed ${ev.type}">
@@ -2265,22 +2343,7 @@ int main() {
                     </div>
                 `;
             }).join('');
-            
-            // Apply dark/light mode
-            const previewContainer = document.getElementById('discordPreview');
-            if (isDarkMode) {
-                previewContainer.classList.remove('light-mode');
-            } else {
-                previewContainer.classList.add('light-mode');
-            }
-            
-            lucide.createIcons();
         }
-
-        // Dark mode toggle
-        document.getElementById('darkModeToggle')?.addEventListener('change', function() {
-            previewAllEmbeds();
-        });
 
         // Load webhook customization
         async function loadWebhookCustomization() {
@@ -2296,30 +2359,98 @@ int main() {
             // Update webhook status indicator
             updateWebhookStatusIndicator();
             
+            // Update webhook statistics
+            updateWebhookStats();
+            
             // Show initial preview
             previewAllEmbeds();
         }
 
         function updateWebhookStatusIndicator() {
-            const indicator = document.getElementById('webhookStatusIndicator');
+            console.log('Updating webhook status indicator');
+            console.log('userProfile:', userProfile);
+            console.log('userProfile.discordWebhook:', userProfile?.discordWebhook);
+            
+            const indicator = document.getElementById('webhookStatusBadge');
+            if (!indicator) {
+                console.error('webhookStatusBadge element not found');
+                return;
+            }
+            
             const statusDot = indicator.querySelector('.status-dot');
             const statusText = indicator.querySelector('span');
             
+            console.log('Status indicator elements found:', { statusDot, statusText });
+            
             if (userProfile && userProfile.discordWebhook) {
+                console.log('Setting status to Connected');
                 statusDot.classList.remove('status-offline');
                 statusDot.classList.add('status-online');
                 statusText.textContent = 'Connected';
             } else {
+                console.log('Setting status to Disconnected');
                 statusDot.classList.remove('status-online');
                 statusDot.classList.add('status-offline');
-                statusText.textContent = 'Not Configured';
+                statusText.textContent = 'Disconnected';
+            }
+        }
+
+        function updateWebhookStats() {
+            // Update webhook statistics
+            const sentCount = userProfile.webhookStats?.sentCount || 0;
+            const lastSent = userProfile.webhookStats?.lastSent;
+            
+            document.getElementById('webhookSentCount').textContent = sentCount;
+            
+            if (lastSent) {
+                const timeAgo = getTimeAgo(lastSent);
+                document.getElementById('webhookLastSent').textContent = timeAgo;
+            } else {
+                document.getElementById('webhookLastSent').textContent = 'Never';
+            }
+        }
+
+        function getTimeAgo(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            return `${days} day${days > 1 ? 's' : ''} ago`;
+        }
+
+        async function updateWebhookSentStats(count) {
+            try {
+                const uid = auth.currentUser.uid;
+                const currentStats = userProfile.webhookStats || { sentCount: 0, lastSent: null };
+                
+                const newStats = {
+                    sentCount: currentStats.sentCount + count,
+                    lastSent: Date.now()
+                };
+                
+                // Update local userProfile
+                userProfile.webhookStats = newStats;
+                
+                // Update Firebase
+                await update(ref(db, 'users/' + uid), { webhookStats: newStats });
+                
+                // Update UI
+                updateWebhookStats();
+                
+                console.log(`[Webhook] Stats updated: sent ${newStats.sentCount} messages`);
+            } catch (error) {
+                console.error('[Webhook] Failed to update stats:', error);
             }
         }
 
         // ── Settings ────────────────────────────────────
         function updateSettings() {
             if (!userProfile) return;
-            document.getElementById('settingsUsername').textContent = userProfile.username || '—';
             document.getElementById('settingsEmail').textContent = userProfile.email || '—';
             document.getElementById('settingsOwnerId').textContent = userProfile.ownerId || '—';
             const isPremium = userProfile.plan === 'premium';
@@ -2379,6 +2510,121 @@ int main() {
             loadWebhookCustomization();
         }
 
+        window.editUsername = function() {
+            const currentUsername = userProfile.username || '';
+            document.getElementById('newUsername').value = currentUsername;
+            document.getElementById('usernameError').style.display = 'none';
+            document.getElementById('usernameDialog').style.display = 'flex';
+            
+            // Focus on input
+            setTimeout(() => {
+                document.getElementById('newUsername').focus();
+                document.getElementById('newUsername').select();
+            }, 100);
+        };
+
+        window.closeUsernameDialog = function() {
+            document.getElementById('usernameDialog').style.display = 'none';
+        };
+
+        window.saveUsernameFromDialog = async function() {
+            const newUsername = document.getElementById('newUsername').value.trim();
+            const errorElement = document.getElementById('usernameError');
+            
+            // Clear previous error
+            errorElement.style.display = 'none';
+            
+            // Validation
+            if (!newUsername) {
+                errorElement.textContent = 'Username cannot be empty';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            if (newUsername.length < 3 || newUsername.length > 20) {
+                errorElement.textContent = 'Username must be 3-20 characters long';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            if (!/^[a-zA-Z0-9_]+$/.test(newUsername)) {
+                errorElement.textContent = 'Username can only contain letters, numbers, and underscores';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            if (newUsername === userProfile.username) {
+                closeUsernameDialog();
+                showNotification('Username unchanged', 'info');
+                return;
+            }
+            
+            try {
+                const uid = auth.currentUser.uid;
+                await update(ref(db, 'users/' + uid), { username: newUsername });
+                userProfile.username = newUsername;
+                
+                // Update display - username removed
+                
+                closeUsernameDialog();
+                showNotification('Username updated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error updating username:', error);
+                errorElement.textContent = 'Failed to update username';
+                errorElement.style.display = 'block';
+            }
+        };
+
+        // Handle Enter key in dialog
+        document.getElementById('newUsername').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                saveUsernameFromDialog();
+            }
+        });
+
+        // Close dialog on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const dialog = document.getElementById('usernameDialog');
+                if (dialog.style.display === 'flex') {
+                    closeUsernameDialog();
+                }
+            }
+        });
+
+        async function saveUsername(newUsername) {
+            try {
+                const uid = auth.currentUser.uid;
+                await update(ref(db, 'users/' + uid), { username: newUsername });
+                userProfile.username = newUsername;
+                
+                // Update display
+                document.getElementById('settingsUsername').textContent = newUsername;
+                
+                showNotification('Username updated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error updating username:', error);
+                showNotification('Failed to update username', 'error');
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
         // ── Discord Webhook Logging ────────────────────
         function showWebhookStatus(msg, color) {
             const el = document.getElementById('webhookStatus');
@@ -2403,6 +2649,9 @@ int main() {
                 await update(ref(db, 'users/' + uid), { discordWebhook: url });
                 userProfile.discordWebhook = url;
                 showWebhookStatus('Webhook saved successfully!', '#10b981');
+                
+                // Update status indicator
+                updateWebhookStatusIndicator();
             } catch (e) {
                 showWebhookStatus('Error saving webhook: ' + e.message, '#ef4444');
             }
@@ -2445,6 +2694,9 @@ int main() {
                 userProfile.discordWebhook = null;
                 document.getElementById('webhookUrlInput').value = '';
                 showWebhookStatus('Webhook removed.', '#888');
+                
+                // Update status indicator
+                updateWebhookStatusIndicator();
             } catch (e) {
                 showWebhookStatus('Error removing webhook: ' + e.message, '#ef4444');
             }
@@ -2476,11 +2728,20 @@ int main() {
             if (embeds.length === 0) return;
 
             try {
-                await fetch(url, {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ embeds })
                 });
+                
+                if (response.ok) {
+                    console.log('[Webhook] Sent successfully');
+                    
+                    // Update webhook statistics
+                    await updateWebhookSentStats(events.length);
+                } else {
+                    console.error('[Webhook] Failed to send:', response.status);
+                }
             } catch (e) {
                 console.error('Webhook send failed:', e);
             }
