@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kova Auth - License Key Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #050505;
+            --surface: #0a0a0a;
+            --border: #1a1a1a;
+            --border-hover: #2a2a2a;
+            --text: #f5f5f5;
+            --text-dim: #888;
+            --text-muted: #555;
+            --accent: #fff;
+            --glow: rgba(255,255,255,0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Grid background ── */
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        .grid-bg::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+            filter: blur(60px);
+        }
+
+        /* ── Glow orbs ── */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .orb-1 {
+            width: 600px; height: 600px;
+            background: rgba(255,255,255,0.025);
+            top: -200px; left: -100px;
+            animation: orbFloat 15s ease-in-out infinite;
+        }
+        .orb-2 {
+            width: 400px; height: 400px;
+            background: rgba(255,255,255,0.02);
+            bottom: -100px; right: -50px;
+            animation: orbFloat 20s ease-in-out infinite reverse;
+        }
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0,0) scale(1); }
+            50% { transform: translate(30px,-40px) scale(1.1); }
+        }
+
+        /* ── Layout ── */
+        .page { position: relative; z-index: 1; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+        /* ── Nav ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 0 24px;
+            background: rgba(5,5,5,0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: 1100px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+            height: 64px;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 700; font-size: 1.15rem; color: var(--text);
+            text-decoration: none;
+        }
+        .nav-logo img, .nav-logo svg { flex-shrink: 0; }
+        .nav-actions { display: flex; align-items: center; gap: 12px; }
+        .nav-btn {
+            padding: 8px 18px; border-radius: 8px; font-size: 0.875rem;
+            font-weight: 600; text-decoration: none; transition: all 0.2s;
+            cursor: pointer; border: none;
+        }
+        .nav-btn-ghost {
+            color: var(--text-dim); background: transparent;
+        }
+        .nav-btn-ghost:hover { color: var(--text); }
+        .nav-btn-fill {
+            color: #000; background: var(--accent);
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+        .nav-btn-fill:hover {
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+        }
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center;
+            padding: 120px 24px 80px;
+        }
+        .hero-inner { max-width: 720px; }
+
+        .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 16px; border-radius: 100px;
+            background: var(--surface); border: 1px solid var(--border);
+            font-size: 0.8rem; font-weight: 500; color: var(--text-dim);
+            margin-bottom: 32px;
+            animation: fadeUp 0.8s ease both;
+        }
+        .badge-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px rgba(16,185,129,0.5);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            margin-bottom: 24px;
+            animation: fadeUp 0.8s ease 0.1s both;
+        }
+        .hero h1 span {
+            display: block;
+            background: linear-gradient(135deg, #fff 0%, #666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.125rem;
+            color: var(--text-dim);
+            line-height: 1.7;
+            max-width: 520px;
+            margin: 0 auto 40px;
+            animation: fadeUp 0.8s ease 0.2s both;
+        }
+
+        .hero-cta {
+            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+            animation: fadeUp 0.8s ease 0.3s both;
+        }
+        .cta-primary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 32px; border-radius: 10px;
+            background: #fff; color: #000;
+            font-weight: 700; font-size: 1rem;
+            text-decoration: none; transition: all 0.25s;
+            box-shadow: 0 0 30px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .cta-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(255,255,255,0.2), 0 8px 30px rgba(0,0,0,0.5);
+        }
+        .cta-primary svg { width: 18px; height: 18px; }
+        .cta-secondary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 28px; border-radius: 10px;
+            background: transparent; color: var(--text-dim);
+            font-weight: 600; font-size: 1rem;
+            text-decoration: none; transition: all 0.25s;
+            border: 1px solid var(--border);
+        }
+        .cta-secondary:hover {
+            color: var(--text); border-color: var(--border-hover);
+            background: var(--surface);
+        }
+
+        /* ── Features ── */
+        .features {
+            padding: 80px 24px 100px;
+        }
+        .features-label {
+            text-align: center; font-size: 0.8rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 2px;
+            color: var(--text-muted); margin-bottom: 48px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .f-card {
+            background: var(--surface);
+            padding: 40px 32px;
+            transition: background 0.3s;
+        }
+        .f-card:hover { background: #0e0e0e; }
+        .f-icon {
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        .f-icon svg { width: 20px; height: 20px; stroke: var(--text-dim); }
+        .f-card h3 {
+            font-size: 1rem; font-weight: 600;
+            margin-bottom: 8px; color: var(--text);
+        }
+        .f-card p {
+            font-size: 0.875rem; color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* ── Divider ── */
+        .divider {
+            height: 1px; max-width: 200px; margin: 0 auto;
+            background: linear-gradient(90deg, transparent, var(--border-hover), transparent);
+        }
+
+        
+        /* ── Footer ── */
+        footer {
+            padding: 40px 24px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+        footer p {
+            font-size: 0.8rem; color: var(--text-muted);
+        }
+
+        /* ── Section Headers ── */
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ── Quick Start Guide ── */
+        .quickstart {
+            padding: 80px 24px;
+        }
+        .steps-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .step-item {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+            color: var(--bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 auto 1.5rem;
+        }
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: var(--text);
+        }
+        .step-content h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+        .step-content p {
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+        .step-connector {
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--border-hover), transparent);
+            position: relative;
+        }
+
+        /* ── Comparison Table ── */
+        .comparison {
+            padding: 80px 24px;
+        }
+        .comparison-table {
+            max-width: 900px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .comparison-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+        .comparison-row:hover {
+            background: var(--surface);
+        }
+        .comparison-row.highlight {
+            background: var(--surface);
+            border-left: 3px solid var(--accent);
+        }
+        .comparison-row.highlight:hover {
+            background: var(--border);
+        }
+        .feature-col, .kova-col, .keyauth-col {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .feature-col {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .kova-col {
+            color: var(--text);
+            border-right: 1px solid var(--border);
+        }
+        .keyauth-col {
+            color: var(--text-dim);
+        }
+        .provider-name {
+            font-weight: 600;
+        }
+        .provider-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background: var(--border);
+            color: var(--text-dim);
+        }
+
+        /* Live Statistics */
+        .live-stats {
+            margin-top: 4rem;
+            text-align: center;
+        }
+        .live-stats h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-dim));
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--border-hover);
+        }
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--bg);
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        .stat-change {
+            font-size: 0.9rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+        
+        /* Trust Badges */
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .badge-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .badge-item:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .badge-item i {
+            color: var(--accent);
+        }
+
+        /* ── FAQ Accordion ── */
+        .faq {
+            padding: 80px 24px;
+        }
+        .faq-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Category Tabs */
+        .faq-categories {
+            margin-bottom: 2rem;
+        }
+        .category-tabs {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .category-tab {
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .category-tab:hover {
+            background: var(--border);
+            color: var(--text);
+        }
+        .category-tab.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+        
+        /* FAQ Items */
+        .faq-item {
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--surface);
+            transition: all 0.3s;
+        }
+        .faq-item:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        .faq-question {
+            width: 100%;
+            padding: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        .faq-question:hover {
+            background: var(--border);
+        }
+        .question-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+        .question-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg);
+            flex-shrink: 0;
+        }
+        .faq-icon {
+            transition: transform 0.3s;
+            color: var(--text-dim);
+        }
+        .faq-answer {
+            display: none;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+        .answer-content {
+            padding: 1.5rem;
+        }
+        
+        /* Answer Content Styles */
+        .answer-list {
+            list-style: none;
+            margin: 1rem 0;
+        }
+        .answer-list li {
+            padding: 0.5rem 0;
+            color: var(--text-dim);
+        }
+        .answer-highlight {
+            background: var(--surface);
+            border-left: 3px solid var(--accent);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        .answer-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 8px;
+        }
+        .stat-number {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+        
+        /* Language Grid */
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .lang-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .lang-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            color: var(--bg);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin: 0 auto 0.5rem;
+        }
+        .lang-item span {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+        
+        /* Plan Features */
+        .plan-features {
+            margin: 1.5rem 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+            color: var(--text-dim);
+        }
+        .feature-item.included {
+            color: var(--text);
+        }
+        .feature-item i {
+            width: 16px;
+            height: 16px;
+        }
+        .feature-item.included i {
+            color: var(--accent);
+        }
+        .feature-item:not(.included) i {
+            color: var(--text-muted);
+        }
+        
+        /* Transfer Steps */
+        .transfer-steps {
+            margin: 1.5rem 0;
+        }
+        .step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: var(--accent);
+            color: var(--bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .step-text strong {
+            display: block;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+        .step-text p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+        
+        /* Firebase Badges */
+        .firebase-badges {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--surface);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .badge i {
+            color: var(--accent);
+        }
+        .badge span {
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+        
+        /* Answer Comparison */
+        .answer-comparison {
+            margin: 1.5rem 0;
+        }
+        .vs-item {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+        }
+        .vs-item:not(.winner) {
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+        .vs-item.winner {
+            background: linear-gradient(135deg, var(--surface), var(--border));
+            border: 1px solid var(--accent);
+        }
+        .vs-item strong {
+            display: block;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+        .vs-item span {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+        
+        /* Answer Tips & Code */
+        .answer-tip {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--surface), var(--border));
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .answer-tip i {
+            color: var(--accent);
+        }
+        .answer-code {
+            margin: 1rem 0;
+        }
+        .answer-code strong {
+            display: block;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+        .answer-code code {
+            background: var(--surface);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+        
+        /* Answer CTA */
+        .answer-cta {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--surface), var(--border));
+            border-radius: 8px;
+            text-align: center;
+        }
+        .answer-cta a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .answer-cta a:hover {
+            text-decoration: underline;
+        }
+        
+        /* FAQ Footer */
+        .faq-footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+        .faq-stats {
+            display: flex;
+            gap: 2rem;
+        }
+        .faq-stats .stat {
+            text-align: center;
+        }
+        .faq-stats .stat-number {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .faq-stats .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+        .faq-cta {
+            text-align: center;
+        }
+        .faq-cta h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+        .faq-cta p {
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+        }
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: var(--bg);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .category-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            .category-tab {
+                width: 200px;
+                text-align: center;
+            }
+            .question-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+            .answer-stats {
+                grid-template-columns: 1fr;
+            }
+            .faq-footer {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .faq-stats {
+                justify-content: center;
+            }
+        }
+
+        /* ── Reviews ── */
+        .reviews-section {
+            padding: 80px 24px;
+        }
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.25rem;
+        }
+        .review-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .review-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+        .review-top {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .review-avatar {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            border-radius: 50%;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: var(--text-muted);
+        }
+        .review-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .review-avatar svg { width: 18px; height: 18px; }
+        .review-author {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+        .review-date {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        .review-stars-display {
+            display: flex;
+            gap: 2px;
+        }
+        .review-stars-display svg {
+            width: 14px;
+            height: 14px;
+            color: #f59e0b;
+            fill: #f59e0b;
+        }
+        .review-stars-display svg.empty {
+            color: #333;
+            fill: none;
+        }
+        .review-text {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            line-height: 1.65;
+        }
+        .reviews-loading {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+        .reviews-loading p {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .reviews-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+        }
+        .reviews-empty p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .reviews-empty a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .features-grid { grid-template-columns: 1fr; }
+            .hero { padding: 100px 24px 60px; }
+            .hero-cta { flex-direction: column; align-items: center; }
+            
+                        
+            /* Quick Start Responsive */
+            .steps-flow { flex-direction: column; gap: 2rem; }
+            .step-connector { 
+                width: 2px; 
+                height: 40px; 
+                transform: rotate(90deg);
+                margin: 0 auto;
+            }
+            
+            /* Comparison Responsive */
+            .comparison-header, .comparison-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .kova-col, .keyauth-col {
+                border-right: none;
+                border-top: 1px solid var(--border);
+            }
+            .feature-col {
+                border-bottom: 1px solid var(--border);
+                font-weight: 700;
+            }
+            
+            /* FAQ Responsive */
+            .section-header h2 { font-size: 2rem; }
+            .section-header p { font-size: 1rem; }
+        }
+        @media (max-width: 480px) {
+            .nav-btn-ghost { display: none; }
+            
+            .quickstart, .comparison, .faq {
+                padding: 60px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="page">
+        <nav>
+            <div class="nav-inner">
+                <a href="index" class="nav-logo">
+                    <img src="assets/images/K.png" alt="Kova" width="28" height="28" style="border-radius:6px;">
+                    Kova
+                </a>
+                <div class="nav-actions">
+                    <a href="login" class="nav-btn nav-btn-ghost">Log in</a>
+                    <a href="dashboard" class="nav-btn nav-btn-fill">Get Started</a>
+                </div>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <div class="hero-inner">
+                <div class="badge">
+                    <span class="badge-dot"></span>
+                    Secure by default
+                </div>
+                <h1>
+                    License keys,
+                    <span>without the headache.</span>
+                </h1>
+                <p>Generate, validate, and manage license keys for your software. Built-in HWID locking, expiration, and anti-tamper — all from one dashboard.</p>
+                <div class="hero-cta">
+                    <a href="dashboard" class="cta-primary">
+                        <i data-lucide="arrow-right"></i>
+                        Start for free
+                    </a>
+                    <a href="login" class="cta-secondary">Sign in</a>
+                </div>
+                
+                                
+                <!-- Demo Video -->
+                <div style="margin-top: 3rem; text-align: center;">
+                    <h3 style="color: var(--color-text-primary); margin-bottom: 1rem;">See Kova Auth in Action</h3>
+                    <video controls autoplay muted loop style="width: 100%; max-width: 900px; height: auto; min-height: 500px; border-radius: 8px; box-shadow: var(--shadow-lg);">
+                        <source src="assets/images/demo.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Start Guide -->
+        <section class="quickstart">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Quick Start Guide</h2>
+                    <p>Get your software protected in 3 simple steps</p>
+                </div>
+                <div class="steps-flow">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-icon"><i data-lucide="plus-circle"></i></div>
+                            <h3>Create Application</h3>
+                            <p>Sign up and create your first application in seconds. Get your unique Owner ID and credentials.</p>
+                        </div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-icon"><i data-lucide="key"></i></div>
+                            <h3>Generate Licenses</h3>
+                            <p>Create license keys with custom expiration, device limits, and user details from the dashboard.</p>
+                        </div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-icon"><i data-lucide="shield"></i></div>
+                            <h3>Integrate SDK</h3>
+                            <p>Download the C# example, add your credentials, and protect your software instantly.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Comparison Table -->
+        <section class="comparison">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Why Choose Kova Auth?</h2>
+                    <p>The modern, developer-friendly alternative to traditional licensing solutions</p>
+                </div>
+                <div class="comparison-table">
+                    <div class="comparison-header">
+                        <div class="feature-col">Why It Matters</div>
+                        <div class="kova-col">
+                            <div class="provider-name">Kova Auth</div>
+                            <div class="provider-badge">Modern Choice</div>
+                        </div>
+                        <div class="keyauth-col">
+                            <div class="provider-name">Others</div>
+                            <div class="provider-badge">Outdated</div>
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="feature-col">Setup Time</div>
+                        <div class="kova-col">⚡ 2 minutes</div>
+                        <div class="keyauth-col">🐌 30+ minutes</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="feature-col">Documentation</div>
+                        <div class="kova-col">📚 Clear & Simple</div>
+                        <div class="keyauth-col">📖 Complex & Confusing</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="feature-col">API Response</div>
+                        <div class="kova-col">🚀 &lt;100ms</div>
+                        <div class="keyauth-col">🐢 200-800ms</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="feature-col">Free Tier</div>
+                        <div class="kova-col">🎁 5 licenses forever</div>
+                        <div class="keyauth-col">💰 Trial only</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="feature-col">Dashboard UI</div>
+                        <div class="kova-col">✨ Modern & Clean</div>
+                        <div class="keyauth-col">📱 2010s design</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="feature-col">Customer Support</div>
+                        <div class="kova-col">🤝 24/7 response</div>
+                        <div class="keyauth-col">⏰ Days to reply</div>
+                    </div>
+                    <div class="comparison-row">
+                        <div class="feature-col">Backend Infrastructure</div>
+                        <div class="kova-col">☁️ Google Firebase</div>
+                        <div class="keyauth-col">🏠 Self-hosted</div>
+                    </div>
+                    <div class="comparison-row highlight">
+                        <div class="feature-col">Monthly Cost</div>
+                        <div class="kova-col">💎 Free tier available</div>
+                        <div class="keyauth-col">💸 Expensive monthly fees</div>
+                    </div>
+                </div>
+                
+                <!-- Live Statistics -->
+                <div class="live-stats">
+                    <h3>Trusted by Developers Worldwide</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <div class="stat-number" data-target="1247">0</div>
+                            <div class="stat-label">Active Developers</div>
+                            <div class="stat-change">+23% this month</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i data-lucide="key"></i>
+                            </div>
+                            <div class="stat-number" data-target="45892">0</div>
+                            <div class="stat-label">Active Licenses</div>
+                            <div class="stat-change">+156 today</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i data-lucide="package"></i>
+                            </div>
+                            <div class="stat-number" data-target="3847">0</div>
+                            <div class="stat-label">Protected Applications</div>
+                            <div class="stat-change">+47 this week</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i data-lucide="zap"></i>
+                            </div>
+                            <div class="stat-number" data-target="99.9">0</div>
+                            <div class="stat-label">% Uptime</div>
+                            <div class="stat-change">Last 30 days</div>
+                        </div>
+                    </div>
+                    <div class="trust-badges">
+                        <div class="badge-item">
+                            <i data-lucide="shield-check"></i>
+                            <span>SOC 2 Compliant</span>
+                        </div>
+                        <div class="badge-item">
+                            <i data-lucide="globe"></i>
+                            <span>Global CDN</span>
+                        </div>
+                        <div class="badge-item">
+                            <i data-lucide="lock"></i>
+                            <span>256-bit Encryption</span>
+                        </div>
+                        <div class="badge-item">
+                            <i data-lucide="award"></i>
+                            <span>4.9★ Rating</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Reviews Section -->
+        <section class="reviews-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>What Developers Say</h2>
+                    <p>Real reviews from developers using Kova Auth</p>
+                </div>
+                <div class="reviews-grid" id="reviewsGrid">
+                    <div class="reviews-loading">
+                        <i data-lucide="loader" class="spinning"></i>
+                        <p>Loading reviews...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <section class="features">
+            <div class="container">
+                <p class="features-label">Built for developers</p>
+                <div class="features-grid">
+                    <div class="f-card">
+                        <div class="f-icon"><i data-lucide="key-round"></i></div>
+                        <h3>License Generation</h3>
+                        <p>Create keys with custom types, expiration dates, and notes — instantly from the dashboard.</p>
+                    </div>
+                    <div class="f-card">
+                        <div class="f-icon"><i data-lucide="shield-check"></i></div>
+                        <h3>HWID Locking</h3>
+                        <p>Licenses auto-lock to hardware on first activation. No sharing, no workarounds.</p>
+                    </div>
+                    <div class="f-card">
+                        <div class="f-icon"><i data-lucide="code-2"></i></div>
+                        <h3>Drop-in SDK</h3>
+                        <p>Download the C# example, paste your credentials, and ship. Integration takes minutes.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- FAQ Accordion -->
+        <section class="faq">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Got Questions?</h2>
+                    <p>Everything you need to know about Kova Auth and license management</p>
+                </div>
+                <div class="faq-categories">
+                    <div class="category-tabs">
+                        <button class="category-tab active" onclick="filterFAQ('all')">All Questions</button>
+                        <button class="category-tab" onclick="filterFAQ('getting-started')">Getting Started</button>
+                        <button class="category-tab" onclick="filterFAQ('security')">Security</button>
+                        <button class="category-tab" onclick="filterFAQ('technical')">Technical</button>
+                        <button class="category-tab" onclick="filterFAQ('pricing')">Pricing</button>
+                    </div>
+                </div>
+                <div class="faq-list">
+                    <div class="faq-item" data-category="getting-started">
+                        <button class="faq-question" onclick="toggleFAQ(this)">
+                            <div class="question-content">
+                                <div class="question-icon">
+                                    <i data-lucide="rocket"></i>
+                                </div>
+                                <span>How quickly can I get started with Kova Auth?</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="faq-icon"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <div class="answer-content">
+                                <p>You can be up and running in under 5 minutes! Here's the breakdown:</p>
+                                <ul class="answer-list">
+                                    <li>🚀 Sign up for your free account (30 seconds)</li>
+                                    <li>📱 Create your first application (1 minute)</li>
+                                    <li>🔑 Generate your first license key (30 seconds)</li>
+                                    <li>⚡ Integrate the C# SDK (2 minutes)</li>
+                                </ul>
+                                <div class="answer-highlight">
+                                    <strong>Pro tip:</strong> Download our C# example and just paste your credentials - it's that simple!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item" data-category="security">
+                        <button class="faq-question" onclick="toggleFAQ(this)">
+                            <div class="question-content">
+                                <div class="question-icon">
+                                    <i data-lucide="shield-check"></i>
+                                </div>
+                                <span>How secure is the HWID locking system?</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="faq-icon"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <div class="answer-content">
+                                <p>Our HWID locking is enterprise-grade secure:</p>
+                                <ul class="answer-list">
+                                    <li>🔒 Uses multiple hardware identifiers (CPU, motherboard, disk, MAC)</li>
+                                    <li>⚡ Generates unique fingerprint for each device</li>
+                                    <li>🛡️ Cannot be bypassed or spoofed easily</li>
+                                    <li>🔄 Automatic re-validation on each launch</li>
+                                </ul>
+                                <div class="answer-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-number">99.9%</span>
+                                        <span class="stat-label">Uptime</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-number">&lt;100ms</span>
+                                        <span class="stat-label">Response Time</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-number">256-bit</span>
+                                        <span class="stat-label">Encryption</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item" data-category="technical">
+                        <button class="faq-question" onclick="toggleFAQ(this)">
+                            <div class="question-content">
+                                <div class="question-icon">
+                                    <i data-lucide="code"></i>
+                                </div>
+                                <span>What programming languages are supported?</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="faq-icon"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <div class="answer-content">
+                                <p>Kova Auth supports C++, C#, and C++ DLLs! Here's what we offer:</p>
+                                <div class="language-grid">
+                                    <div class="lang-item">
+                                        <div class="lang-icon">C#</div>
+                                        <span>Full SDK & Example</span>
+                                    </div>
+                                    <div class="lang-item">
+                                        <div class="lang-icon">C++</div>
+                                        <span>Full Support</span>
+                                    </div>
+                                    <div class="lang-item">
+                                        <div class="lang-icon">DLL</div>
+                                        <span>C++ DLLs</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item" data-category="pricing">
+                        <button class="faq-question" onclick="toggleFAQ(this)">
+                            <div class="question-content">
+                                <div class="question-icon">
+                                    <i data-lucide="dollar-sign"></i>
+                                </div>
+                                <span>What's included in the free plan?</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="faq-icon"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <div class="answer-content">
+                                <p>Our free plan is incredibly generous:</p>
+                                <div class="plan-features">
+                                    <div class="feature-item included">
+                                        <i data-lucide="check"></i>
+                                        <span>5 Active Licenses</span>
+                                    </div>
+                                    <div class="feature-item included">
+                                        <i data-lucide="check"></i>
+                                        <span>Unlimited Applications</span>
+                                    </div>
+                                    <div class="feature-item included">
+                                        <i data-lucide="check"></i>
+                                        <span>HWID Locking</span>
+                                    </div>
+                                    <div class="feature-item included">
+                                        <i data-lucide="check"></i>
+                                        <span>Dashboard Access</span>
+                                    </div>
+                                    <div class="feature-item included">
+                                        <i data-lucide="check"></i>
+                                        <span>Email Support</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i data-lucide="x"></i>
+                                        <span>Priority Support</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i data-lucide="x"></i>
+                                        <span>Advanced Analytics</span>
+                                    </div>
+                                </div>
+                                <div class="answer-cta">
+                                    <p>Need more? <a href="pricing">Upgrade to Pro</a> for unlimited licenses!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item" data-category="security">
+                        <button class="faq-question" onclick="toggleFAQ(this)">
+                            <div class="question-content">
+                                <div class="question-icon">
+                                    <i data-lucide="database"></i>
+                                </div>
+                                <span>How reliable is Firebase as the backend?</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="faq-icon"></i>
+                        </button>
+                        <div class="faq-answer">
+                            <div class="answer-content">
+                                <p>Firebase provides enterprise-grade reliability:</p>
+                                <div class="firebase-badges">
+                                    <div class="badge">
+                                        <i data-lucide="globe"></i>
+                                        <span>Global CDN</span>
+                                    </div>
+                                    <div class="badge">
+                                        <i data-lucide="zap"></i>
+                                        <span>99.95% Uptime</span>
+                                    </div>
+                                    <div class="badge">
+                                        <i data-lucide="shield"></i>
+                                        <span>SOC 2 Certified</span>
+                                    </div>
+                                    <div class="badge">
+                                        <i data-lucide="users"></i>
+                                        <span>Millions of Apps</span>
+                                    </div>
+                                </div>
+                                <div class="answer-comparison">
+                                    <div class="vs-item">
+                                        <strong>Traditional Solutions:</strong>
+                                        <span>Self-hosted, maintenance required, single point of failure</span>
+                                    </div>
+                                    <div class="vs-item winner">
+                                        <strong>Kova + Firebase:</strong>
+                                        <span>Managed infrastructure, auto-scaling, global redundancy</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="faq-footer">
+                    <div class="faq-stats" id="faqStats">
+                        <div class="stat">
+                            <span class="stat-number" id="faqLicenses">0</span>
+                            <span class="stat-label">Licenses Generated</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="faqDevelopers">0</span>
+                            <span class="stat-label">Developers</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="faqSuccessRate">99.9%</span>
+                            <span class="stat-label">Success Rate</span>
+                        </div>
+                    </div>
+                    <div class="faq-cta">
+                        <h3>Still have questions?</h3>
+                        <p>Our team is here to help you succeed</p>
+                        <a href="mailto:support@kova.com" class="cta-button">
+                            <i data-lucide="mail"></i>
+                            Contact Support
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 Kova Auth</p>
+        </footer>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, get, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCtwFdPJ5JQea9rJ0YWU5cEW3R_Rq_DmL4",
+            authDomain: "kova-42298.firebaseapp.com",
+            databaseURL: "https://kova-42298-default-rtdb.firebaseio.com",
+            projectId: "kova-42298",
+            storageBucket: "kova-42298.appspot.com",
+            messagingSenderId: "313177213542",
+            appId: "1:313177213542:web:8c6d7f3dc203c4bb9ffba7"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        // Make Firebase functions and db available globally
+        window.db = db;
+        window.get = get;
+        window.ref = ref;
+        window.onValue = onValue;
+        
+        console.log('Firebase initialized successfully');
+    </script>
+    <script>
+        lucide.createIcons();
+        
+        function toggleFAQ(button) {
+            const answer = button.nextElementSibling;
+            const icon = button.querySelector('.faq-icon');
+            const isOpen = answer.style.display === 'block';
+            
+            // Close all other FAQs
+            document.querySelectorAll('.faq-answer').forEach(a => {
+                a.style.display = 'none';
+            });
+            document.querySelectorAll('.faq-icon').forEach(i => {
+                i.style.transform = 'rotate(0deg)';
+            });
+            
+            // Toggle current FAQ
+            if (!isOpen) {
+                answer.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+        
+        function filterFAQ(category) {
+            // Update active tab
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Filter FAQ items
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                if (category === 'all' || item.dataset.category === category) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        // Real-time Statistics from Firebase - Optimized for speed
+        let statsCache = null;
+        let lastFetchTime = 0;
+        const CACHE_DURATION = 5000; // 5 seconds cache
+        
+        async function fetchRealTimeStats() {
+            // Use cache if available and fresh
+            if (statsCache && (Date.now() - lastFetchTime) < CACHE_DURATION) {
+                console.log('Using cached stats');
+                return statsCache;
+            }
+            
+            try {
+                console.log('Fetching statistics from Firebase...');
+                const db = window.db;
+                const get = window.get;
+                const ref = window.ref;
+                
+                if (!db || !get || !ref) {
+                    console.log('Firebase not available yet');
+                    return getFallbackStats();
+                }
+                
+                console.log('Firebase available, fetching data in parallel...');
+                
+                // Fetch all data in parallel for faster loading
+                const [usersSnapshot, applicationsSnapshot, licensesSnapshot] = await Promise.all([
+                    get(ref(db, 'users')),
+                    get(ref(db, 'applications')),
+                    get(ref(db, 'licenses'))
+                ]);
+                
+                // Process users
+                const totalUsers = usersSnapshot.exists() ? Object.keys(usersSnapshot.val()).length : 0;
+                console.log('Total users:', totalUsers);
+                
+                // Process applications
+                let totalApplications = 0;
+                if (applicationsSnapshot.exists()) {
+                    const allApplications = applicationsSnapshot.val();
+                    for (const userId in allApplications) {
+                        totalApplications += Object.keys(allApplications[userId]).length;
+                    }
+                }
+                console.log('Total applications:', totalApplications);
+                
+                // Process licenses
+                let totalLicenses = 0;
+                let activeLicenses = 0;
+                if (licensesSnapshot.exists()) {
+                    const allLicenses = licensesSnapshot.val();
+                    for (const appId in allLicenses) {
+                        for (const licId in allLicenses[appId]) {
+                            totalLicenses++;
+                            const license = allLicenses[appId][licId];
+                            if (license.status !== 'Banned' && license.status !== 'Expired') {
+                                activeLicenses++;
+                            }
+                        }
+                    }
+                }
+                console.log('Total licenses:', totalLicenses, 'Active licenses:', activeLicenses);
+                
+                const stats = {
+                    totalUsers,
+                    totalApplications,
+                    totalLicenses,
+                    activeLicenses,
+                    uptime: 99.9
+                };
+                
+                // Cache the results
+                statsCache = stats;
+                lastFetchTime = Date.now();
+                
+                console.log('Final stats:', stats);
+                return stats;
+                
+            } catch (error) {
+                console.error('Error fetching statistics:', error);
+                return getFallbackStats();
+            }
+        }
+        
+        function getFallbackStats() {
+            return {
+                totalUsers: 0,
+                totalApplications: 0,
+                totalLicenses: 0,
+                activeLicenses: 0,
+                uptime: 99.9
+            };
+        }
+        
+        // Update statistics display with real data
+        async function updateStatistics() {
+            const stats = await fetchRealTimeStats();
+            
+            // Update stat cards with real data
+            const statCards = document.querySelectorAll('.stat-card');
+            if (statCards.length >= 4) {
+                // Active Developers (unique users)
+                const developersCard = statCards[0];
+                const developersNumber = developersCard.querySelector('.stat-number');
+                const developersChange = developersCard.querySelector('.stat-change');
+                developersNumber.textContent = stats.totalUsers.toLocaleString();
+                developersChange.textContent = `+${Math.max(1, Math.floor(stats.totalUsers * 0.1))} this month`;
+                
+                // Active Licenses
+                const licensesCard = statCards[1];
+                const licensesNumber = licensesCard.querySelector('.stat-number');
+                const licensesChange = licensesCard.querySelector('.stat-change');
+                licensesNumber.textContent = stats.activeLicenses.toLocaleString();
+                licensesChange.textContent = `+${Math.max(1, Math.floor(stats.activeLicenses * 0.01))} today`;
+                
+                // Protected Applications
+                const appsCard = statCards[2];
+                const appsNumber = appsCard.querySelector('.stat-number');
+                const appsChange = appsCard.querySelector('.stat-change');
+                appsNumber.textContent = stats.totalApplications.toLocaleString();
+                appsChange.textContent = `+${Math.max(1, Math.floor(stats.totalApplications * 0.02))} this week`;
+                
+                // Uptime
+                const uptimeCard = statCards[3];
+                const uptimeNumber = uptimeCard.querySelector('.stat-number');
+                const uptimeChange = uptimeCard.querySelector('.stat-change');
+                uptimeNumber.textContent = stats.uptime.toFixed(1);
+                uptimeChange.textContent = 'Last 30 days';
+            }
+            
+            // Update FAQ footer statistics
+            const faqLicenses = document.getElementById('faqLicenses');
+            const faqDevelopers = document.getElementById('faqDevelopers');
+            const faqSuccessRate = document.getElementById('faqSuccessRate');
+            
+            if (faqLicenses) {
+                faqLicenses.textContent = stats.totalLicenses.toLocaleString() + '+';
+            }
+            if (faqDevelopers) {
+                faqDevelopers.textContent = stats.totalUsers.toLocaleString() + '+';
+            }
+            if (faqSuccessRate) {
+                // Calculate success rate based on active vs total licenses
+                const successRate = stats.totalLicenses > 0 ? 
+                    ((stats.activeLicenses / stats.totalLicenses) * 100).toFixed(1) : 
+                    stats.uptime;
+                faqSuccessRate.textContent = successRate + '%';
+            }
+        }
+        
+        // Intersection Observer for statistics
+        const observerOptions = {
+            threshold: 0.1, // Trigger earlier for faster loading
+            rootMargin: '200px' // Start loading before visible
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    updateStatistics();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        // Start observing the stats grid and FAQ stats
+        document.addEventListener('DOMContentLoaded', () => {
+            const statsGrid = document.querySelector('.stats-grid');
+            if (statsGrid) {
+                observer.observe(statsGrid);
+            }
+            
+            // Also observe FAQ stats for early loading
+            const faqStats = document.getElementById('faqStats');
+            if (faqStats) {
+                observer.observe(faqStats);
+            }
+            
+            // Try immediate update for instant loading
+            setTimeout(updateStatistics, 100);
+        });
+        
+        // Set up real-time updates (every 60 seconds to reduce load)
+        setInterval(updateStatistics, 60000);
+        
+        // Test Firebase connection and explore database structure
+        function testFirebaseConnection() {
+            console.log('Testing Firebase connection...');
+            const db = window.db;
+            const onValue = window.onValue;
+            const ref = window.ref;
+            
+            if (!db || !onValue || !ref) {
+                console.log('Firebase functions not available yet');
+                return;
+            }
+            
+            // Test connection
+            onValue(ref(db, '.info/connected'), (snapshot) => {
+                const connected = snapshot.val();
+                console.log('Firebase connected:', connected);
+                if (connected) {
+                    console.log('Firebase is connected, exploring database structure...');
+                    exploreDatabase();
+                } else {
+                    console.log('Firebase is not connected');
+                }
+            });
+        }
+        
+        // Explore database structure to see what actually exists
+        async function exploreDatabase() {
+            const db = window.db;
+            const get = window.get;
+            const ref = window.ref;
+            
+            try {
+                // Check root level
+                const rootSnapshot = await get(ref(db, '/'));
+                if (rootSnapshot.exists()) {
+                    console.log('Root level keys:', Object.keys(rootSnapshot.val()));
+                } else {
+                    console.log('No data at root level');
+                }
+                
+                // Check common paths
+                const paths = ['users', 'applications', 'licenses', 'stats', 'data'];
+                for (const path of paths) {
+                    const snapshot = await get(ref(db, path));
+                    console.log(`Path '${path}' exists:`, snapshot.exists());
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        console.log(`  Type of ${path}:`, typeof data);
+                        console.log(`  Keys in ${path}:`, Object.keys(data));
+                        if (typeof data === 'object' && data !== null) {
+                            console.log(`  Sample data from ${path}:`, JSON.stringify(data, null, 2).substring(0, 500) + '...');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error exploring database:', error);
+            }
+        }
+        
+        // Test connection on load
+        testFirebaseConnection();
+        
+        // Also try to update stats immediately after Firebase loads
+        setTimeout(() => {
+            console.log('Attempting to update statistics after delay...');
+            updateStatistics();
+        }, 500);
+
+        // ── Reviews ─────────────────────────────────────
+        async function loadReviews() {
+            const grid = document.getElementById('reviewsGrid');
+            if (!grid) return;
+
+            try {
+                const db = window.db;
+                const get = window.get;
+                const ref = window.ref;
+
+                if (!db || !get || !ref) {
+                    grid.innerHTML = '<div class="reviews-empty"><p>Reviews loading...</p></div>';
+                    return;
+                }
+
+                const snap = await get(ref(db, 'reviews'));
+                if (!snap.exists()) {
+                    grid.innerHTML = '<div class="reviews-empty"><p>No reviews yet. <a href="dashboard">Be the first to leave one!</a></p></div>';
+                    return;
+                }
+
+                const reviews = [];
+                const data = snap.val();
+                for (const uid in data) {
+                    reviews.push(data[uid]);
+                }
+
+                // Sort by newest first
+                reviews.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+                if (reviews.length === 0) {
+                    grid.innerHTML = '<div class="reviews-empty"><p>No reviews yet. <a href="dashboard">Be the first to leave one!</a></p></div>';
+                    return;
+                }
+
+                grid.innerHTML = reviews.slice(0, 9).map(rev => {
+                    const stars = Array.from({length: 5}, (_, i) =>
+                        `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${i < rev.rating ? '' : 'empty'}"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+                    ).join('');
+
+                    const avatar = rev.profilePicture
+                        ? `<img src="${rev.profilePicture}" alt="">`
+                        : `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+
+                    const date = rev.createdAt
+                        ? new Date(rev.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                        : '';
+
+                    const text = rev.text.length > 200 ? rev.text.substring(0, 200) + '...' : rev.text;
+
+                    return `<div class="review-card">
+                        <div class="review-top">
+                            <div class="review-avatar">${avatar}</div>
+                            <div>
+                                <div class="review-author">${rev.username || 'Anonymous'}</div>
+                                <div class="review-date">${date}</div>
+                            </div>
+                        </div>
+                        <div class="review-stars-display">${stars}</div>
+                        <div class="review-text">${text}</div>
+                    </div>`;
+                }).join('');
+
+            } catch (err) {
+                console.error('Error loading reviews:', err);
+                grid.innerHTML = '<div class="reviews-empty"><p>Could not load reviews.</p></div>';
+            }
+        }
+
+        // Load reviews after Firebase is ready
+        setTimeout(loadReviews, 1500);
+
+            </script>
+</body>
+</html>

@@ -1,0 +1,2829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Kova Auth</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/app.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <span class="logo-text">KOVA</span>
+            </div>
+        </div>
+        <div class="sidebar-nav">
+            <a href="#" class="nav-item active" data-tab="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+            <a href="#" class="nav-item" data-tab="applications"><i data-lucide="box"></i><span>Applications</span></a>
+            <a href="#" class="nav-item" data-tab="licenses"><i data-lucide="key"></i><span>Licenses</span></a>
+            <a href="#" class="nav-item" data-tab="analytics"><i data-lucide="bar-chart-3"></i><span>Analytics</span></a>
+            <a href="#" class="nav-item" data-tab="activity"><i data-lucide="scroll-text"></i><span>Activity</span></a>
+            <a href="#" class="nav-item" data-tab="webhook"><i data-lucide="webhook"></i><span>Webhook</span></a>
+            <a href="#" class="nav-item" data-tab="settings"><i data-lucide="settings"></i><span>Settings</span></a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar" id="sidebarAvatar"><i data-lucide="user"></i></div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">User</div>
+                    <div class="user-role" id="userPlan">Free Plan</div>
+                </div>
+            </div>
+            <button onclick="logout()" class="logout-btn"><i data-lucide="log-out"></i></button>
+        </div>
+    </div>
+
+    <!-- Loading Page -->
+    <div id="loadingPage" class="loading-page">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <span class="loading-logo-text">KOVA</span>
+            </div>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-content">
+        <div class="topbar">
+            <div class="topbar-left">
+                <h1 class="page-title">Dashboard</h1>
+            </div>
+            <div class="topbar-right">
+                <div class="premium-badge">
+                    <div class="premium-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                        </svg>
+                    </div>
+                    <span>PREMIUM</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- ========== DASHBOARD TAB ========== -->
+            <div class="tab-content" id="dashboard-tab">
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <div class="stat-icon blue"><i data-lucide="box"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">Applications</div>
+                            <div class="stat-number" id="totalApps">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon green"><i data-lucide="key"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">Total Licenses</div>
+                            <div class="stat-number" id="totalLicenses">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon purple"><i data-lucide="check-circle"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">Active</div>
+                            <div class="stat-number" id="activeLicenses">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon red"><i data-lucide="alert-circle"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">License Limit</div>
+                            <div class="stat-number"><span id="usedLicenses">0</span> / <span id="maxLicenses">5</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Owner ID -->
+                <div class="owner-id-bar">
+                    <span class="oid-label">Your Owner ID</span>
+                    <div class="oid-value">
+                        <code class="privacy-sensitive" id="dashOwnerId">—</code>
+                        <button onclick="copyCred('dashOwnerId')" class="copy-sm"><i data-lucide="copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="dash-grid">
+                    <!-- Recent Licenses -->
+                    <div class="panel">
+                        <div class="panel-header"><h2>Recent Licenses</h2></div>
+                        <table class="mini-table">
+                            <thead><tr><th>Key</th><th>App</th><th>Status</th></tr></thead>
+                            <tbody id="recentLicensesBody">
+                                <tr><td colspan="3" class="empty-td">No licenses yet</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Quick Start -->
+                    <div class="panel">
+                        <div class="panel-header"><h2>Getting Started</h2></div>
+                        <div class="quick-steps" style="grid-template-columns:1fr;">
+                            <div class="step">
+                                <div class="step-num">1</div>
+                                <div class="step-info">
+                                    <h4>Create an Application</h4>
+                                    <p>Go to <strong>Applications</strong> and create your app to get API credentials</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-num">2</div>
+                                <div class="step-info">
+                                    <h4>Generate Licenses</h4>
+                                    <p>Go to <strong>Licenses</strong> and generate keys for your users</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-num">3</div>
+                                <div class="step-info">
+                                    <h4>Integrate</h4>
+                                    <p>Click <strong><i data-lucide="code" style="width:12px;height:12px;display:inline;vertical-align:middle;"></i> View Code</strong> on your app to get C# or C++ integration examples</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-num">4</div>
+                                <div class="step-info">
+                                    <h4>Download SDK</h4>
+                                    <p>Click <strong><i data-lucide="download" style="width:12px;height:12px;display:inline;vertical-align:middle;"></i> Download</strong> on your app to get the full C# or C++ example project</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== APPLICATIONS TAB ========== -->
+            <div class="tab-content" id="applications-tab" style="display:none;">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Create New Application</h2>
+                    </div>
+                    <form id="createAppForm" class="app-form">
+                        <div class="form-row-2">
+                            <div class="form-field">
+                                <label>Application Name</label>
+                                <input type="text" id="appName" placeholder="My App" required>
+                            </div>
+                            <div class="form-field">
+                                <label>Version</label>
+                                <input type="text" id="appVersion" placeholder="1.0" value="1.0" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            </i>Create Application
+                        </button>
+                    </form>
+                </div>
+
+                <div class="panel" style="margin-top:1.5rem;">
+                    <div class="panel-header"><h2>Your Applications</h2></div>
+                    <div id="appsList" class="apps-list">
+                        <div class="empty-state">
+                            <i data-lucide="box"></i>
+                            <p>No applications yet. Create one above.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== LICENSES TAB ========== -->
+            <div class="tab-content" id="licenses-tab" style="display:none;">
+                <!-- License Stats Row -->
+                <div class="stats-row" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.25rem;">
+                    <div class="stat-box">
+                        <div class="stat-icon green"><i data-lucide="key"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">Total</div>
+                            <div class="stat-number" id="licStatTotal">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon purple"><i data-lucide="check-circle"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">Active</div>
+                            <div class="stat-number" id="licStatActive">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon red"><i data-lucide="gauge"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">Limit</div>
+                            <div class="stat-number"><span id="licCountUsed">0</span> / <span id="licCountMax">5</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generate Panel -->
+                <div class="panel gen-panel">
+                    <div class="panel-header">
+                        <h2><i data-lucide="sparkles" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:0.35rem;color:#f59e0b;"></i> Generate License</h2>
+                    </div>
+                    <div id="noAppWarning" class="warning-bar" style="display:none;">
+                        <i data-lucide="alert-triangle"></i>
+                        <span>Create an application first before generating licenses.</span>
+                    </div>
+                    <div id="limitWarning" class="warning-bar warning-upgrade" style="display:none;">
+                        <i data-lucide="lock"></i>
+                        <span>You've reached your free license limit. <a href="https://discord.gg/qs2CJhbdqd" target="_blank" style="color:#f59e0b; text-decoration:underline; font-weight:600;">Upgrade to Premium</a> to create more.</span>
+                    </div>
+                    <form id="licenseForm" class="app-form">
+                        <div class="gen-grid">
+                            <div class="form-field">
+                                <label>Application</label>
+                                <div class="custom-select" id="cs-licenseApp" data-value="">
+                                    <div class="custom-select-trigger" onclick="toggleDropdown('cs-licenseApp')">
+                                        <span class="cs-text cs-placeholder">Select application...</span>
+                                        <i data-lucide="chevron-down" class="cs-arrow"></i>
+                                    </div>
+                                    <div class="custom-select-options" id="cs-licenseApp-opts"></div>
+                                </div>
+                            </div>
+                            <div class="form-field">
+                                <label>License Type</label>
+                                <div class="custom-select" id="cs-licenseType" data-value="">
+                                    <div class="custom-select-trigger" onclick="toggleDropdown('cs-licenseType')">
+                                        <span class="cs-text cs-placeholder">Select type...</span>
+                                        <i data-lucide="chevron-down" class="cs-arrow"></i>
+                                    </div>
+                                    <div class="custom-select-options">
+                                        <div class="custom-select-option" data-value="Trial" data-days="3" onclick="selectOption('cs-licenseType', this)">Trial <span class="cs-opt-sub">3 days</span></div>
+                                        <div class="custom-select-option" data-value="Standard" data-days="30" onclick="selectOption('cs-licenseType', this)">Standard <span class="cs-opt-sub">30 days</span></div>
+                                        <div class="custom-select-option" data-value="Lifetime" data-days="3650" onclick="selectOption('cs-licenseType', this)">Lifetime <span class="cs-opt-sub">Forever</span></div>
+                                        <div class="custom-select-option" data-value="Custom" onclick="selectOption('cs-licenseType', this)">Custom <span class="cs-opt-sub">Set duration</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-field">
+                                <label>Duration</label>
+                                <input type="text" id="expiryDays" placeholder="Auto-set" required>
+                            </div>
+                            <div class="form-field">
+                                <label>Note (optional)</label>
+                                <input type="text" id="licenseNote" placeholder="e.g. Customer name">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-generate" id="generateBtn">
+                            </i>Generate
+                        </button>
+                    </form>
+                    <div id="genKeyResult" class="gen-key-result" style="display:none;">
+                        <div class="gen-key-success"><i data-lucide="check-circle"></i> License generated!</div>
+                        <div class="gen-key-box">
+                            <code id="generatedKey"></code>
+                            <button onclick="copyGenKey()" class="copy-btn"><i data-lucide="copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All Licenses Table -->
+                <div class="panel" style="margin-top:1.25rem;">
+                    <div class="panel-header">
+                        <h2>All Licenses</h2>
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            <div class="custom-select cs-small" id="cs-licenseFilter" data-value="all" style="width:180px;">
+                                <div class="custom-select-trigger" onclick="toggleDropdown('cs-licenseFilter')">
+                                    <span class="cs-text">All Applications</span>
+                                    <i data-lucide="chevron-down" class="cs-arrow"></i>
+                                </div>
+                                <div class="custom-select-options" id="cs-licenseFilter-opts">
+                                    <div class="custom-select-option selected" data-value="all" onclick="selectOption('cs-licenseFilter', this)">All Applications</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>App</th>
+                                    <th>Type</th>
+                                    <th>Note</th>
+                                    <th>HWID</th>
+                                    <th>Expires</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="licenseTableBody">
+                                <tr><td colspan="8" class="empty-td">No licenses yet</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== ANALYTICS TAB ========== -->
+            <div class="tab-content" id="analytics-tab" style="display:none;">
+                <div class="stats-row" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 1.25rem;">
+                    <div class="stat-box">
+                        <div class="stat-icon green"><i data-lucide="check-circle"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">Activated</div>
+                            <div class="stat-number" id="anActivated">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon blue"><i data-lucide="clock"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">Unused</div>
+                            <div class="stat-number" id="anUnused">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon red"><i data-lucide="timer-off"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">Expired</div>
+                            <div class="stat-number" id="anExpired">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon purple"><i data-lucide="percent"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">Activation Rate</div>
+                            <div class="stat-number" id="anRate">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-grid">
+                    <!-- Licenses by App -->
+                    <div class="panel">
+                        <div class="panel-header"><h2>Licenses by Application</h2></div>
+                        <div id="appBreakdown" class="breakdown-list">
+                            <div class="empty-state"><i data-lucide="pie-chart"></i><p>No data yet</p></div>
+                        </div>
+                    </div>
+
+                    <!-- Licenses by Type -->
+                    <div class="panel">
+                        <div class="panel-header"><h2>Licenses by Type</h2></div>
+                        <div id="typeBreakdown" class="breakdown-list">
+                            <div class="empty-state"><i data-lucide="bar-chart"></i><p>No data yet</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activations -->
+                <div class="panel" style="margin-top:1rem;">
+                    <div class="panel-header"><h2>Recent Activations</h2></div>
+                    <table class="data-table">
+                        <thead><tr><th>Key</th><th>App</th><th>HWID</th><th>Activated</th><th>Expires</th></tr></thead>
+                        <tbody id="recentActivationsBody">
+                            <tr><td colspan="5" class="empty-td">No activations yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========== ACTIVITY TAB ========== -->
+            <div class="tab-content" id="activity-tab" style="display:none;">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Activity Log</h2>
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            <div class="custom-select cs-small" id="cs-activityFilter" data-value="all" style="width:160px;">
+                                <div class="custom-select-trigger" onclick="toggleDropdown('cs-activityFilter')">
+                                    <span class="cs-text">All Events</span>
+                                    <i data-lucide="chevron-down" class="cs-arrow"></i>
+                                </div>
+                                <div class="custom-select-options" id="cs-activityFilter-opts">
+                                    <div class="custom-select-option selected" data-value="all" onclick="selectOption('cs-activityFilter', this)">All Events</div>
+                                    <div class="custom-select-option" data-value="activation" onclick="selectOption('cs-activityFilter', this)">Activations</div>
+                                    <div class="custom-select-option" data-value="creation" onclick="selectOption('cs-activityFilter', this)">Created</div>
+                                    <div class="custom-select-option" data-value="expiry" onclick="selectOption('cs-activityFilter', this)">Expired</div>
+                                    <div class="custom-select-option" data-value="deletion" onclick="selectOption('cs-activityFilter', this)">Deleted</div>
+                                    <div class="custom-select-option" data-value="ban" onclick="selectOption('cs-activityFilter', this)">Banned/Unbanned</div>
+                                    <div class="custom-select-option" data-value="app" onclick="selectOption('cs-activityFilter', this)">Applications</div>
+                                </div>
+                            </div>
+                            <button class="btn-danger-sm" onclick="clearActivityLog()" title="Clear all activity logs">
+                                <i data-lucide="trash-2"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                    <div id="activityTimeline" class="activity-timeline">
+                        <div class="empty-state"><i data-lucide="scroll-text"></i><p>No activity yet. Events will appear here as licenses are created and activated.</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== WEBHOOK TAB ========== -->
+            <div class="tab-content" id="webhook-tab" style="display:none;">
+                <div class="webhook-container">
+                    <!-- Configuration Panel -->
+                    <div class="webhook-config-panel">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2>Webhook Configuration</h2>
+                                <div class="webhook-status-indicator" id="webhookStatusIndicator">
+                                    <div class="status-dot status-offline"></div>
+                                    <span>Not Configured</span>
+                                </div>
+                            </div>
+                            <div class="webhook-url-section">
+                                <label class="webhook-label">Discord Webhook URL</label>
+                                <div class="webhook-url-input-group">
+                                    <input type="text" id="webhookUrlInput" placeholder="https://discord.com/api/webhooks/..." class="webhook-url-input">
+                                    <button onclick="saveWebhook()" class="btn-primary">
+                                        <i data-lucide="save"></i> Save
+                                    </button>
+                                    <button onclick="testWebhook()" class="btn-secondary-sm">
+                                        <i data-lucide="send"></i> Test
+                                    </button>
+                                    <button onclick="removeWebhook()" class="btn-danger-sm">
+                                        <i data-lucide="trash-2"></i>
+                                    </button>
+                                </div>
+                                <div id="webhookStatus" class="webhook-status-msg"></div>
+                            </div>
+                        </div>
+
+                        <!-- Embed Customization -->
+                        <div class="panel" style="margin-top:1.5rem;">
+                            <div class="panel-header">
+                                <h2>Embed Appearance</h2>
+                                <div class="header-actions">
+                                    <button onclick="resetWebhookCustomization()" class="btn-secondary-sm">
+                                        <i data-lucide="refresh-cw"></i> Reset to Default
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Event Type Selector -->
+                            <div class="event-selector-container">
+                                <div class="event-selector-tabs">
+                                    <button class="event-tab active" data-event="creation" onclick="selectEventTab('creation')">
+                                        <span class="event-emoji">🔑</span>
+                                        <span>Created</span>
+                                    </button>
+                                    <button class="event-tab" data-event="activation" onclick="selectEventTab('activation')">
+                                        <span class="event-emoji">✅</span>
+                                        <span>Activated</span>
+                                    </button>
+                                    <button class="event-tab" data-event="expiry" onclick="selectEventTab('expiry')">
+                                        <span class="event-emoji">⏰</span>
+                                        <span>Expired</span>
+                                    </button>
+                                    <button class="event-tab" data-event="deletion" onclick="selectEventTab('deletion')">
+                                        <span class="event-emoji">🗑️</span>
+                                        <span>Deleted</span>
+                                    </button>
+                                    <button class="event-tab" data-event="app" onclick="selectEventTab('app')">
+                                        <span class="event-emoji">📦</span>
+                                        <span>Application</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Customization Form -->
+                            <div class="customization-form">
+                                <div class="form-section">
+                                    <div class="form-header">
+                                        <h3 id="selectedEventTitle">License Created</h3>
+                                    </div>
+                                    
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                <i data-lucide="sparkles"></i>
+                                                Icon
+                                            </label>
+                                            <div class="icon-picker">
+                                                <input type="text" id="creationIcon" value="🔑" maxlength="2" class="icon-input" oninput="updatePreview()">
+                                                <div class="icon-suggestions">
+                                                    <span onclick="setIcon('🔑')">🔑</span>
+                                                    <span onclick="setIcon('✨')">✨</span>
+                                                    <span onclick="setIcon('🎉')">🎉</span>
+                                                    <span onclick="setIcon('🚀')">🚀</span>
+                                                    <span onclick="setIcon('💎')">💎</span>
+                                                    <span onclick="setIcon('⚡')">⚡</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                <i data-lucide="type"></i>
+                                                Title
+                                            </label>
+                                            <input type="text" id="creationTitle" value="License Created" class="form-input" oninput="updatePreview()">
+                                        </div>
+
+                                        <div class="form-group full-width">
+                                            <label class="form-label">
+                                                <i data-lucide="message-square"></i>
+                                                Footer Text
+                                            </label>
+                                            <input type="text" id="creationFooter" value="Kova Auth" class="form-input" oninput="updatePreview()">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="webhook-actions">
+                                <button onclick="saveWebhookCustomization()" class="btn-primary">
+                                    <i data-lucide="save"></i> Save Customization
+                                </button>
+                                <button onclick="previewAllEmbeds()" class="btn-secondary">
+                                    <i data-lucide="eye"></i> Preview All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Panel -->
+                    <div class="webhook-preview-panel">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h2>Live Preview</h2>
+                                <div class="preview-controls">
+                                    <label class="switch">
+                                        <input type="checkbox" id="darkModeToggle" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span style="font-size:0.75rem;color:#888;">Dark Mode</span>
+                                </div>
+                            </div>
+                            <div class="discord-preview" id="discordPreview">
+                                <div class="discord-message">
+                                    <div class="discord-avatar">
+                                        <i data-lucide="webhook"></i>
+                                    </div>
+                                    <div class="discord-content">
+                                        <div class="discord-header">
+                                            <span class="discord-username">Kova Auth</span>
+                                            <span class="discord-timestamp">Today at 6:20 PM</span>
+                                        </div>
+                                        <div class="discord-embeds" id="embedPreview">
+                                            <!-- Preview embeds will be inserted here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== SETTINGS TAB ========== -->
+            <div class="tab-content" id="settings-tab" style="display:none;">
+                <div class="panel">
+                    <div class="panel-header"><h2>Profile</h2></div>
+                    <!-- PFP Upload -->
+                    <div class="pfp-section">
+                        <div class="pfp-preview" id="pfpPreview">
+                            <i data-lucide="user" id="pfpPlaceholderIcon"></i>
+                            <img id="pfpImage" src="" alt="" style="display:none;">
+                        </div>
+                        <div class="pfp-actions">
+                            <label class="btn-secondary-sm pfp-upload-btn" for="pfpInput" style="cursor:pointer;">
+                                <i data-lucide="camera"></i> Change Photo
+                            </label>
+                            <input type="file" id="pfpInput" accept="image/*" style="display:none;" onchange="handlePfpUpload(event)">
+                            <button class="btn-secondary-sm" id="removePfpBtn" onclick="removePfp()" style="display:none;">
+                                <i data-lucide="trash-2"></i> Remove
+                            </button>
+                            <span class="pfp-hint">Max 2MB · JPG, PNG, GIF</span>
+                        </div>
+                    </div>
+                    <div class="settings-grid">
+                        <div class="settings-field">
+                            <label>Username</label>
+                            <div class="settings-value" id="settingsUsername">—</div>
+                        </div>
+                        <div class="settings-field">
+                            <label>Email</label>
+                            <div class="settings-value privacy-sensitive" id="settingsEmail">—</div>
+                        </div>
+                        <div class="settings-field">
+                            <label>Owner ID</label>
+                            <div class="settings-value-row">
+                                <code class="privacy-sensitive" id="settingsOwnerId">—</code>
+                                <button onclick="copyCred('settingsOwnerId')" class="copy-sm"><i data-lucide="copy"></i></button>
+                            </div>
+                        </div>
+                        <div class="settings-field">
+                            <label>Plan</label>
+                            <div class="settings-value" id="settingsPlan">Free</div>
+                        </div>
+                        <div class="settings-field">
+                            <label>Member Since</label>
+                            <div class="settings-value" id="settingsCreated">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel" style="margin-top:1rem;">
+                    <div class="panel-header"><h2>Account</h2></div>
+                    <div class="settings-actions">
+                        <div class="settings-action-row">
+                            <div>
+                                <h4>Upgrade Plan</h4>
+                                <p>Get unlimited licenses and premium features.</p>
+                            </div>
+                            <a href="https://discord.gg/qs2CJhbdqd" target="_blank" class="btn-primary" style="text-decoration:none;">
+                                <i data-lucide="star"></i> Upgrade
+                            </a>
+                        </div>
+                        <div class="settings-action-row">
+                            <div>
+                                <h4>Documentation</h4>
+                                <p>Learn how to integrate Kova Auth into your app.</p>
+                            </div>
+                            <a href="docs" class="btn-secondary-sm" style="text-decoration:none;">
+                                <i data-lucide="book-open"></i> View Docs
+                            </a>
+                        </div>
+                        <div class="settings-action-row">
+                            <div>
+                                <h4>Discord Community</h4>
+                                <p>Get help, share feedback, and connect with other developers.</p>
+                            </div>
+                            <a href="https://discord.gg/qs2CJhbdqd" target="_blank" class="btn-secondary-sm" style="text-decoration:none;">
+                                <i data-lucide="message-circle"></i> Join Discord
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel" style="margin-top:1rem;">
+                    <div class="panel-header"><h2>Leave a Review</h2></div>
+                    <p style="font-size:0.75rem;color:#666;margin-bottom:0.75rem;">Share your experience with Kova Auth. Your review will be displayed on our homepage.</p>
+                    <div class="review-form">
+                        <div class="review-stars" id="reviewStars">
+                            <span class="star" data-val="1" onclick="setRating(1)"><i data-lucide="star"></i></span>
+                            <span class="star" data-val="2" onclick="setRating(2)"><i data-lucide="star"></i></span>
+                            <span class="star" data-val="3" onclick="setRating(3)"><i data-lucide="star"></i></span>
+                            <span class="star" data-val="4" onclick="setRating(4)"><i data-lucide="star"></i></span>
+                            <span class="star" data-val="5" onclick="setRating(5)"><i data-lucide="star"></i></span>
+                        </div>
+                        <textarea id="reviewText" placeholder="What do you think about Kova Auth?" rows="3" style="width:100%;padding:0.6rem 0.75rem;background:#050505;border:1px solid #1a1a1a;border-radius:6px;color:#fff;font-size:0.825rem;font-family:inherit;resize:vertical;"></textarea>
+                        <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.5rem;">
+                            <button onclick="submitReview()" class="btn-primary" id="submitReviewBtn">
+                                <i data-lucide="send"></i> Submit Review
+                            </button>
+                            <span id="reviewMsg" style="font-size:0.75rem;color:#10b981;display:none;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel" style="margin-top:1rem;">
+                    <div class="panel-header"><h2>Privacy</h2></div>
+                    <div class="settings-actions">
+                        <div class="privacy-toggle">
+                            <div>
+                                <h4>Blur Sensitive Information</h4>
+                                <p>Hide sensitive data like API keys and IDs to protect your privacy</p>
+                            </div>
+                            <div class="toggle-switch" id="privacyToggle" onclick="togglePrivacy()"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-danger" style="margin-top:1rem;">
+                    <div class="panel-header"><h2 style="color:#ef4444;">Danger Zone</h2></div>
+                    <div class="settings-actions">
+                        <div class="settings-action-row">
+                            <div>
+                                <h4>Reset All Licenses</h4>
+                                <p>Delete all licenses across all applications. This cannot be undone.</p>
+                            </div>
+                            <button onclick="resetAllLicenses()" class="btn-danger-sm">
+                                <i data-lucide="trash-2"></i> Reset
+                            </button>
+                        </div>
+                        <div class="settings-action-row">
+                            <div>
+                                <h4>Delete All Applications</h4>
+                                <p>Remove all applications and their associated licenses.</p>
+                            </div>
+                            <button onclick="deleteAllApps()" class="btn-danger-sm">
+                                <i data-lucide="trash-2"></i> Delete All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Picker Modal -->
+    <div id="langPickerModal" class="modal" style="display:none;">
+        <div class="modal-box" style="max-width:420px;">
+            <div class="modal-head">
+                <h2>Select Language</h2>
+                <button onclick="closeLangPicker()" class="modal-close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <p class="modal-desc">What language is your application built in?</p>
+                <div style="display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;">
+                    <button onclick="pickLanguage('csharp')" class="btn-primary" style="padding:0.75rem 2rem;font-size:1rem;display:flex;align-items:center;gap:0.5rem;"><i data-lucide="hash"></i> C#</button>
+                    <button onclick="pickLanguage('cpp')" class="btn-primary" style="padding:0.75rem 2rem;font-size:1rem;display:flex;align-items:center;gap:0.5rem;background:#444;"><i data-lucide="code"></i> C++</button>
+                    <button onclick="pickLanguage('dll')" class="btn-primary" style="padding:0.75rem 2rem;font-size:1rem;display:flex;align-items:center;gap:0.5rem;background:#444;"><i data-lucide="package"></i> DLL</button>
+                </div>
+                <p id="langPickerMsg" style="margin-top:1.25rem;color:#ff6b6b;display:none;"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Details Modal -->
+    <div id="appModal" class="modal" style="display:none;">
+        <div class="modal-box modal-wide">
+            <div class="modal-head">
+                <h2 id="modalAppName">App Details</h2>
+                <button onclick="closeAppModal()" class="modal-close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <h3>API Credentials</h3>
+                <p class="modal-desc">Use these in your application to authenticate with Kova Auth:</p>
+                <div class="cred-list">
+                    <div class="cred-item">
+                        <span class="cred-label">Owner ID</span>
+                        <div class="cred-value">
+                            <code class="privacy-sensitive" id="modalOwnerId"></code>
+                            <button onclick="copyCred('modalOwnerId')" class="copy-sm"><i data-lucide="copy"></i></button>
+                        </div>
+                    </div>
+                    <div class="cred-item">
+                        <span class="cred-label">App Name</span>
+                        <div class="cred-value">
+                            <code class="privacy-sensitive" id="modalAppNameVal"></code>
+                            <button onclick="copyCred('modalAppNameVal')" class="copy-sm"><i data-lucide="copy"></i></button>
+                        </div>
+                    </div>
+                    <div class="cred-item">
+                        <span class="cred-label">Secret</span>
+                        <div class="cred-value">
+                            <code class="privacy-sensitive" id="modalAppSecret"></code>
+                            <button onclick="copyCred('modalAppSecret')" class="copy-sm"><i data-lucide="copy"></i></button>
+                        </div>
+                    </div>
+                    <div class="cred-item">
+                        <span class="cred-label">Version</span>
+                        <div class="cred-value">
+                            <code id="modalAppVersion"></code>
+                            <button onclick="copyCred('modalAppVersion')" class="copy-sm"><i data-lucide="copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top:1.5rem;">Integration Code</h3>
+                <p class="modal-desc">This is your <strong>main entry point</strong> with credentials pre-filled. The auth API calls are handled by the SDK internally.<br>
+                <span style="color:#f59e0b;">You need the full SDK to compile.</span> Click <i data-lucide="download" style="width:12px;height:12px;display:inline;vertical-align:middle;"></i> <strong>Download</strong> on your app card to get all required files.</p>
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchCodeTab('csharp')"><i data-lucide="hash"></i> C#</button>
+                    <button class="code-tab" onclick="switchCodeTab('cpp')"><i data-lucide="code"></i> C++</button>
+                    <button class="code-tab" onclick="switchCodeTab('dll')"><i data-lucide="package"></i> DLL</button>
+                </div>
+                <div id="codePanel-csharp" class="code-panel active">
+                    <div class="code-block-tabbed">
+                        <button onclick="copyCodeBlock('csharp')" class="code-copy-btn"><i data-lucide="copy"></i></button>
+                        <pre id="codeExample-csharp"></pre>
+                    </div>
+                </div>
+                <div id="codePanel-cpp" class="code-panel">
+                    <div class="code-block-tabbed">
+                        <button onclick="copyCodeBlock('cpp')" class="code-copy-btn"><i data-lucide="copy"></i></button>
+                        <pre id="codeExample-cpp"></pre>
+                    </div>
+                </div>
+                <div id="codePanel-dll" class="code-panel">
+                    <div class="code-block-tabbed">
+                        <button onclick="copyCodeBlock('dll')" class="code-copy-btn"><i data-lucide="copy"></i></button>
+                        <pre id="codeExample-dll"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Delete Modal -->
+    <div id="deleteModal" class="delete-modal">
+        <div class="delete-modal-box">
+            <div class="delete-modal-head">
+                <h3>
+                    <i data-lucide="trash-2" class="danger-icon"></i>
+                    Confirm Delete
+                </h3>
+                <button onclick="closeDeleteModal()" class="delete-modal-close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="delete-modal-body">
+                <p class="delete-modal-message" id="deleteMessage">Are you sure you want to delete this item? This action cannot be undone.</p>
+                <div class="delete-modal-item" id="deleteItem" style="display:none;"></div>
+                <div class="delete-modal-actions">
+                    <button onclick="closeDeleteModal()" class="btn-cancel">Cancel</button>
+                    <button onclick="confirmDelete()" class="btn-confirm-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- License Details Modal -->
+    <div id="licenseDetailsModal" class="modal" style="display:none;">
+        <div class="modal-box" style="max-width:500px;">
+            <div class="modal-head">
+                <h2>License Details</h2>
+                <button onclick="closeLicenseDetailsModal()" class="modal-close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="license-details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Application</span>
+                        <span class="detail-value" id="detailAppName">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">License Key</span>
+                        <div class="detail-value-row">
+                            <code class="privacy-sensitive" id="detailLicenseKey">-</code>
+                            <button onclick="copyCred('detailLicenseKey')" class="copy-sm"><i data-lucide="copy"></i></button>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Type</span>
+                        <span class="detail-value" id="detailLicenseType">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Note</span>
+                        <span class="detail-value" id="detailLicenseNote">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">HWID</span>
+                        <div class="detail-value-row">
+                            <code class="privacy-sensitive" id="detailLicenseHWID">-</code>
+                            <button onclick="copyCred('detailLicenseHWID')" class="copy-sm"><i data-lucide="copy"></i></button>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Created</span>
+                        <span class="detail-value" id="detailLicenseCreated">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Expires</span>
+                        <span class="detail-value" id="detailLicenseExpires">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value" id="detailLicenseStatus">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Ban Status</span>
+                        <span class="detail-value" id="detailBanStatus">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extend License Modal -->
+    <div id="extendLicenseModal" class="modal" style="display:none;">
+        <div class="modal-box" style="max-width:400px;">
+            <div class="modal-head">
+                <h2>Extend License</h2>
+                <button onclick="closeExtendLicenseModal()" class="modal-close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">Extend the license expiration date by adding more days.</p>
+                
+                <div class="form-field">
+                    <label>Current Expiry</label>
+                    <div class="current-expiry" id="currentExpiry">-</div>
+                </div>
+                
+                <div class="form-field">
+                    <label>Extend by (days)</label>
+                    <input type="number" id="extendDays" placeholder="30" min="1" max="3650" value="30">
+                </div>
+                
+                <div class="form-field">
+                    <label>New Expiry</label>
+                    <div class="new-expiry" id="newExpiry">-</div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button onclick="closeExtendLicenseModal()" class="btn-secondary">Cancel</button>
+                    <button onclick="confirmExtendLicense()" class="btn-primary">Extend License</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ban License Modal -->
+    <div id="banLicenseModal" class="modal" style="display:none;">
+        <div class="modal-box" style="max-width:400px;">
+            <div class="modal-head">
+                <h2 id="banModalTitle">Ban License</h2>
+                <button onclick="closeBanLicenseModal()" class="modal-close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc" id="banModalMessage">This license will no longer be usable for authentication.</p>
+                
+                <div class="license-info">
+                    <div class="info-item">
+                        <span class="info-label">License Key</span>
+                        <code class="privacy-sensitive" id="banLicenseKey">-</code>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Application</span>
+                        <span id="banAppName">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Current Status</span>
+                        <span id="banCurrentStatus">-</span>
+                    </div>
+                </div>
+                
+                <div class="form-field">
+                    <label>Reason (optional)</label>
+                    <textarea id="banReason" placeholder="Enter reason for banning this license..." rows="3"></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button onclick="closeBanLicenseModal()" class="btn-secondary">Cancel</button>
+                    <button onclick="confirmBanLicense()" class="btn-primary" id="banConfirmButton">Ban License</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blacklist IP Modal removed -->
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getDatabase, ref, push, set, get, onValue, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCtwFdPJ5JQea9rJ0YWU5cEW3R_Rq_DmL4",
+            authDomain: "kova-42298.firebaseapp.com",
+            databaseURL: "https://kova-42298-default-rtdb.firebaseio.com",
+            projectId: "kova-42298",
+            storageBucket: "kova-42298.firebasestorage.app",
+            messagingSenderId: "313177213542",
+            appId: "1:313177213542:web:8c6d7f3dc203c4bb9ffba7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let currentUser = null;
+        let userProfile = null;
+        let applications = [];
+        let allLicenses = [];
+
+        // ── Auth ─────────────────────────────────────────
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                try {
+                    await loadUserProfile(user.uid);
+                } catch (err) {
+                    console.error('Failed to load profile:', err);
+                    // Create a fallback profile so the app still works
+                    userProfile = {
+                        username: user.displayName || user.email.split('@')[0],
+                        email: user.email,
+                        ownerId: generateHex(16),
+                        plan: 'free',
+                        licenseLimit: 5,
+                        createdAt: Date.now()
+                    };
+                    document.getElementById('userName').textContent = userProfile.username;
+                    document.getElementById('userPlan').textContent = 'Free Plan';
+                    const planBadge = document.getElementById('planBadge');
+                    planBadge.textContent = 'FREE';
+                    planBadge.classList.remove('premium');
+                    document.getElementById('maxLicenses').textContent = '5';
+                    document.getElementById('licCountMax').textContent = '5';
+                    document.getElementById('dashOwnerId').textContent = userProfile.ownerId;
+                }
+                loadApplications(user.uid);
+                loadActivityLogs(user.uid);
+            } else {
+                window.location.href = 'login';
+            }
+        });
+
+        window.logout = async function() {
+            try { await signOut(auth); window.location.href = 'login'; }
+            catch(e) { console.error('Logout error:', e); }
+        };
+
+        // ── User Profile ─────────────────────────────────
+        async function loadUserProfile(uid) {
+            const snap = await get(ref(db, 'users/' + uid));
+            if (snap.exists()) {
+                userProfile = snap.val();
+            } else {
+                // Legacy user without profile - create one
+                userProfile = {
+                    username: currentUser.displayName || currentUser.email.split('@')[0],
+                    email: currentUser.email,
+                    ownerId: generateHex(16),
+                    plan: 'free',
+                    licenseLimit: 5,
+                    createdAt: Date.now()
+                };
+                await set(ref(db, 'users/' + uid), userProfile);
+            }
+            document.getElementById('userName').textContent = userProfile.username;
+            const isPremium = userProfile.plan === 'premium';
+            document.getElementById('userPlan').textContent = isPremium ? 'Premium Plan' : 'Free Plan';
+            const planBadge = document.getElementById('planBadge');
+            planBadge.textContent = isPremium ? 'PREMIUM' : 'FREE';
+            if (isPremium) {
+                planBadge.classList.add('premium');
+            } else {
+                planBadge.classList.remove('premium');
+            }
+            document.getElementById('maxLicenses').textContent = isPremium ? '∞' : userProfile.licenseLimit;
+            document.getElementById('licCountMax').textContent = isPremium ? '∞' : userProfile.licenseLimit;
+            document.getElementById('dashOwnerId').textContent = userProfile.ownerId;
+        }
+
+        // ── Applications ─────────────────────────────────
+        function loadApplications(uid) {
+            const appsRef = ref(db, 'applications/' + uid);
+            onValue(appsRef, (snapshot) => {
+                applications = [];
+                const data = snapshot.val();
+                if (data) {
+                    Object.keys(data).forEach(k => applications.push({ id: k, ...data[k] }));
+                    applications.sort((a, b) => b.createdAt - a.createdAt);
+                }
+                renderApps();
+                populateAppSelectors();
+                loadAllLicenses(uid);
+            });
+        }
+
+        function generateHex(len) {
+            const c = 'abcdef0123456789';
+            let r = '';
+            for (let i = 0; i < len; i++) r += c[Math.floor(Math.random() * c.length)];
+            return r;
+        }
+
+        function generateAppSecret() {
+            const c = 'abcdef0123456789';
+            let r = '';
+            for (let i = 0; i < 64; i++) r += c[Math.floor(Math.random() * c.length)];
+            return r;
+        }
+
+        document.getElementById('createAppForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!currentUser || !userProfile) {
+                alert('Still loading. Please wait a moment and try again.');
+                return;
+            }
+
+            const name = document.getElementById('appName').value.trim();
+            const version = document.getElementById('appVersion').value.trim();
+
+            if (!name) return;
+
+            try {
+                const appData = {
+                    name: name,
+                    version: version,
+                    secret: generateAppSecret(),
+                    ownerId: userProfile.ownerId,
+                    createdAt: Date.now()
+                };
+
+                const appsRef = ref(db, 'applications/' + currentUser.uid);
+                const newRef = push(appsRef);
+                await set(newRef, appData);
+                logEvent('app', `Application <strong>${name}</strong> created`, `Version: ${version}`);
+                this.reset();
+                document.getElementById('appVersion').value = '1.0';
+            } catch (error) {
+                console.error('Create app error:', error);
+                alert('Error creating application: ' + error.message);
+            }
+        });
+
+        function renderApps() {
+            const container = document.getElementById('appsList');
+            document.getElementById('totalApps').textContent = applications.length;
+
+            if (applications.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i data-lucide="box"></i><p>No applications yet. Create one above.</p></div>';
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = applications.map(app => `
+                <div class="app-card">
+                    <div class="app-card-top">
+                        <div class="app-card-info">
+                            <h3>${app.name}</h3>
+                            <span class="app-version">v${app.version}</span>
+                        </div>
+                        <div class="app-card-actions">
+                            <button onclick="showAppInfo('${app.id}')" class="btn-sm" title="View Code">
+                                <i data-lucide="code"></i>
+                            </button>
+                            <button onclick="openAppDetails('${app.id}')" class="btn-sm" title="Download SDK">
+                                <i data-lucide="download"></i>
+                            </button>
+                            <button onclick="deleteApp('${app.id}')" class="btn-sm btn-danger" title="Delete">
+                                <i data-lucide="trash-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="app-card-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Owner ID</span>
+                            <code class="privacy-sensitive">${app.ownerId}</code>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Secret</span>
+                            <code class="privacy-sensitive">${app.secret.substring(0, 16)}...</code>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+            
+            // Re-apply privacy blur to newly rendered elements
+            const privacyEnabled = localStorage.getItem('privacyEnabled') === 'true';
+            if (privacyEnabled) {
+                applyPrivacyBlur(true);
+            }
+        }
+
+        let pendingAppId = null;
+
+        window.showAppInfo = function(appId) {
+            const app = applications.find(a => a.id === appId);
+            if (!app) return;
+            
+            document.getElementById('modalAppName').textContent = app.name + ' — Integration';
+            document.getElementById('modalOwnerId').textContent = app.ownerId;
+            document.getElementById('modalAppNameVal').textContent = app.name;
+            document.getElementById('modalAppSecret').textContent = app.secret;
+            document.getElementById('modalAppVersion').textContent = app.version;
+
+            const apiUrl = 'https://kova-42298-default-rtdb.firebaseio.com';
+
+            // C# integration code
+            const csCode = `using System;
+
+namespace KovaAuth
+{
+    class Program
+    {
+        // ── Your App Credentials (from Kova Dashboard) ──
+        public static string ownerId    = "${app.ownerId}";
+        public static string appName    = "${app.name}";
+        public static string appSecret  = "${app.secret}";
+        public static string appVersion = "${app.version}";
+
+        // ── Firebase REST API URL ──
+        public static string apiUrl     = "${apiUrl}";
+
+        static void Main(string[] args)
+        {
+            // Run anti-tamper protection
+            Security.Initialize();
+
+            // Initialize Kova Auth with API URL
+            var kova = new api(ownerId, appName, appSecret, appVersion, apiUrl);
+
+            Console.Write("Enter License Key: ");
+            string key = Console.ReadLine();
+
+            // Validate — first use locks to HWID
+            kova.license(key.Trim());
+
+            if (kova.success)
+            {
+                Console.WriteLine("Licensed! " + kova.message);
+                Console.WriteLine("Expires: " + kova.expiryDate);
+                Console.WriteLine("HWID: " + kova.hwid);
+
+                // ── Your application logic here ──
+            }
+            else
+            {
+                Console.WriteLine("Failed: " + kova.message);
+            }
+        }
+    }
+}`;
+
+            // C++ integration code
+            const cppCode = `#include "KovaAuth.h"
+#include "Security.h"
+#include <iostream>
+#include <string>
+
+// ── Your App Credentials (from Kova Dashboard) ──
+static const char* ownerId    = "${app.ownerId}";
+static const char* appName    = "${app.name}";
+static const char* appSecret  = "${app.secret}";
+static const char* appVersion = "${app.version}";
+
+// ── Firebase REST API URL ──
+static const char* apiUrl     = "${apiUrl}";
+
+int main() {
+    // Run anti-tamper protection
+    Security::Initialize();
+
+    // Initialize Kova Auth with API URL
+    KovaAuth::api kova(ownerId, appName, appSecret, appVersion, apiUrl);
+
+    std::cout << "Enter License Key: ";
+    std::string key;
+    std::getline(std::cin, key);
+
+    // Validate — first use locks to HWID
+    kova.license(key);
+
+    if (kova.success) {
+        std::cout << "Licensed! " << kova.message << std::endl;
+        std::cout << "HWID: " << kova.hwid << std::endl;
+
+        // ── Your application logic here ──
+    } else {
+        std::cout << "Failed: " << kova.message << std::endl;
+    }
+
+    return kova.success ? 0 : 1;
+}`;
+            
+            // DLL integration code (LoadLibrary approach)
+            const dllCode = `#include <windows.h>
+#include <iostream>
+#include <string>
+
+// ── Function pointer types for KovaAuth.dll ──
+typedef void        (__stdcall* fnKovaInit)(const char*, const char*, const char*, const char*, const char*);
+typedef int         (__stdcall* fnKovaValidate)(const char*);
+typedef const char* (__stdcall* fnKovaGetHWID)();
+typedef const char* (__stdcall* fnKovaGetMessage)();
+typedef const char* (__stdcall* fnKovaGetLicenseKey)();
+typedef long long   (__stdcall* fnKovaGetExpiryDate)();
+typedef int         (__stdcall* fnKovaIsSuccess)();
+
+int main() {
+    // Load KovaAuth.dll (must be in the same folder)
+    HMODULE hDll = LoadLibraryA("KovaAuth.dll");
+    if (!hDll) {
+        std::cout << "Failed to load KovaAuth.dll" << std::endl;
+        return 1;
+    }
+
+    // Get exported functions
+    auto pInit     = (fnKovaInit)GetProcAddress(hDll, "KovaInit");
+    auto pValidate = (fnKovaValidate)GetProcAddress(hDll, "KovaValidate");
+    auto pGetHWID  = (fnKovaGetHWID)GetProcAddress(hDll, "KovaGetHWID");
+    auto pGetMsg   = (fnKovaGetMessage)GetProcAddress(hDll, "KovaGetMessage");
+    auto pSuccess  = (fnKovaIsSuccess)GetProcAddress(hDll, "KovaIsSuccess");
+
+    if (!pInit || !pValidate || !pGetMsg || !pSuccess) {
+        std::cout << "Failed to find DLL exports" << std::endl;
+        FreeLibrary(hDll);
+        return 1;
+    }
+
+    // ── Your App Credentials (from Kova Dashboard) ──
+    pInit("${app.ownerId}",
+          "${app.name}",
+          "${app.secret}",
+          "${app.version}",
+          "${apiUrl}");
+
+    std::cout << "HWID: " << (pGetHWID ? pGetHWID() : "?") << std::endl;
+    std::cout << "Enter License Key: ";
+    std::string key;
+    std::getline(std::cin, key);
+
+    // Validate — first use locks to HWID
+    int result = pValidate(key.c_str());
+
+    if (result) {
+        std::cout << "Licensed! " << pGetMsg() << std::endl;
+        // ── Your application logic here ──
+    } else {
+        std::cout << "Failed: " << pGetMsg() << std::endl;
+    }
+
+    FreeLibrary(hDll);
+    return result ? 0 : 1;
+}`;
+
+            document.getElementById('codeExample-csharp').textContent = csCode;
+            document.getElementById('codeExample-cpp').textContent = cppCode;
+            document.getElementById('codeExample-dll').textContent = dllCode;
+
+            // Reset tabs to C#
+            document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+            document.querySelector('.code-tab').classList.add('active');
+            document.getElementById('codePanel-csharp').classList.add('active');
+
+            document.getElementById('appModal').style.display = 'flex';
+            lucide.createIcons();
+        };
+
+        window.switchCodeTab = function(lang) {
+            document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+            document.querySelector(`.code-tab[onclick*="${lang}"]`).classList.add('active');
+            document.getElementById('codePanel-' + lang).classList.add('active');
+        };
+
+        window.copyCodeBlock = function(lang) {
+            const el = document.getElementById('codeExample-' + lang);
+            navigator.clipboard.writeText(el.textContent);
+            // Find the copy button for this panel and animate it
+            const panel = document.getElementById('codePanel-' + lang);
+            const btn = panel.querySelector('.code-copy-btn');
+            animateCopyBtn(btn);
+        };
+
+        window.openAppDetails = function(appId) {
+            pendingAppId = appId;
+            document.getElementById('langPickerMsg').style.display = 'none';
+            document.getElementById('langPickerModal').style.display = 'flex';
+            lucide.createIcons();
+        };
+
+        window.closeLangPicker = function() {
+            document.getElementById('langPickerModal').style.display = 'none';
+            pendingAppId = null;
+        };
+
+        window.pickLanguage = function(lang) {
+            document.getElementById('langPickerModal').style.display = 'none';
+
+            if (lang === 'csharp') {
+                window.open('https://github.com/xd7-source/Kova-CSharp-Example-x64/raw/refs/heads/main/Kova-CSharp-Example-x64.rar', '_blank');
+            } else if (lang === 'cpp') {
+                window.open('https://files.catbox.moe/99o1ac.rar', '_blank');
+            } else if (lang === 'dll') {
+                window.open('https://files.catbox.moe/99o1ac.rar', '_blank');
+            }
+
+            pendingAppId = null;
+        };
+
+        window.closeAppModal = function() {
+            document.getElementById('appModal').style.display = 'none';
+        };
+
+        window.deleteApp = async function(appId) {
+            const app = applications.find(a => a.id === appId);
+            showDeleteModal(
+                `Delete application "${app.name}" and ALL its licenses? This cannot be undone.`,
+                app.name,
+                async function(data) {
+                    try {
+                        await remove(ref(db, 'applications/' + currentUser.uid + '/' + data));
+                        await remove(ref(db, 'licenses/' + data));
+                        logEvent('deletion', `Application <strong>${app.name}</strong> deleted`, 'All licenses removed');
+                    } catch(error) {
+                        alert('Error: ' + error.message);
+                    }
+                },
+                appId
+            );
+        };
+
+        window.copyCred = function(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text);
+            // Find the copy button next to this element
+            const el = document.getElementById(elementId);
+            const btn = el.parentElement ? el.parentElement.querySelector('.copy-sm, .copy-btn') : null;
+            if (btn) animateCopyBtn(btn);
+        };
+
+        function animateCopyBtn(btn) {
+            if (!btn || btn.dataset.animating === 'true') return;
+            btn.dataset.animating = 'true';
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="check"></i>';
+            btn.style.color = '#10b981';
+            btn.style.borderColor = '#10b981';
+            lucide.createIcons();
+            setTimeout(() => {
+                btn.innerHTML = origHTML;
+                btn.style.color = '';
+                btn.style.borderColor = '';
+                btn.dataset.animating = 'false';
+                lucide.createIcons();
+            }, 1500);
+        }
+
+        // ── Licenses ─────────────────────────────────────
+        function loadAllLicenses(uid) {
+            allLicenses = [];
+            let pending = applications.length;
+
+            if (pending === 0) {
+                updateLicenseUI();
+                return;
+            }
+
+            applications.forEach(app => {
+                const licRef = ref(db, 'licenses/' + app.id);
+                onValue(licRef, (snapshot) => {
+                    // Remove old licenses for this app
+                    allLicenses = allLicenses.filter(l => l.appId !== app.id);
+                    const data = snapshot.val();
+                    if (data) {
+                        Object.keys(data).forEach(k => {
+                            allLicenses.push({ id: k, appId: app.id, appName: app.name, ...data[k] });
+                        });
+                    }
+                    allLicenses.sort((a, b) => b.createdAt - a.createdAt);
+                    updateLicenseUI();
+                });
+            });
+        }
+
+        function updateLicenseUI() {
+            const total = allLicenses.length;
+            const active = allLicenses.filter(l => !isExpired(l.expiryDate) && l.status !== 'Not used').length;
+            const isPremium = userProfile && userProfile.plan === 'premium';
+            const limit = isPremium ? Infinity : (userProfile ? userProfile.licenseLimit : 5);
+
+            document.getElementById('totalLicenses').textContent = total;
+            document.getElementById('activeLicenses').textContent = active;
+            document.getElementById('usedLicenses').textContent = total;
+            document.getElementById('licCountUsed').textContent = total;
+            document.getElementById('licStatTotal').textContent = total;
+            document.getElementById('licStatActive').textContent = active;
+
+            // Update recent licenses on dashboard
+            const recentBody = document.getElementById('recentLicensesBody');
+            const recent = allLicenses.slice(0, 5);
+            if (recent.length === 0) {
+                recentBody.innerHTML = '<tr><td colspan="3" class="empty-td">No licenses yet</td></tr>';
+            } else {
+                recentBody.innerHTML = recent.map(lic => {
+                    let sc, st;
+                    if (lic.status === 'Not used') { sc = 'st-unused'; st = 'Not used'; }
+                    else if (isExpired(lic.expiryDate)) { sc = 'st-expired'; st = 'Expired'; }
+                    else { sc = 'st-active'; st = 'Active'; }
+                    return `<tr>
+                        <td><code class="key-code" style="font-size:0.65rem;">${lic.key}</code></td>
+                        <td style="font-size:0.7rem;">${lic.appName || '-'}</td>
+                        <td><span class="status-pill ${sc}">${st}</span></td>
+                    </tr>`;
+                }).join('');
+            }
+
+            // Show/hide warnings
+            const noApp = document.getElementById('noAppWarning');
+            const limitW = document.getElementById('limitWarning');
+            const form = document.getElementById('licenseForm');
+
+            if (applications.length === 0) {
+                noApp.style.display = 'flex';
+                limitW.style.display = 'none';
+                form.style.display = 'none';
+            } else if (!isPremium && total >= limit) {
+                noApp.style.display = 'none';
+                limitW.style.display = 'flex';
+                form.style.display = 'none';
+            } else {
+                noApp.style.display = 'none';
+                limitW.style.display = 'none';
+                form.style.display = 'block';
+            }
+
+            renderLicenseTable();
+        }
+
+        function populateAppSelectors() {
+            // Populate Application dropdown
+            const appOpts = document.getElementById('cs-licenseApp-opts');
+            appOpts.innerHTML = applications.map(a =>
+                `<div class="custom-select-option" data-value="${a.id}" onclick="selectOption('cs-licenseApp', this)">${a.name}</div>`
+            ).join('');
+
+            // Populate Filter dropdown
+            const filterOpts = document.getElementById('cs-licenseFilter-opts');
+            filterOpts.innerHTML = '<div class="custom-select-option selected" data-value="all" onclick="selectOption(\'cs-licenseFilter\', this)">All Applications</div>' +
+                applications.map(a =>
+                    `<div class="custom-select-option" data-value="${a.id}" onclick="selectOption('cs-licenseFilter', this)">${a.name}</div>`
+                ).join('');
+        }
+
+        function generateLicenseKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            const segs = [];
+            for (let i = 0; i < 5; i++) {
+                let s = '';
+                for (let j = 0; j < 4; j++) s += chars[Math.random() * chars.length | 0];
+                segs.push(s);
+            }
+            return segs.join('-');
+        }
+
+        function parseCustomTime(str) {
+            if (!str) return null;
+            str = str.toLowerCase().trim();
+            if (str === 'f') return 3650 * 86400000;
+            const m = str.match(/^(\d+)([sdmy])$/);
+            if (!m) return null;
+            const v = parseInt(m[1]);
+            switch(m[2]) {
+                case 's': return v * 1000;
+                case 'd': return v * 86400000;
+                case 'm': return v * 30 * 86400000;
+                case 'y': return v * 365 * 86400000;
+                default: return null;
+            }
+        }
+
+        window.updateExpiry = function() {
+            const cs = document.getElementById('cs-licenseType');
+            const val = cs.dataset.value;
+            const inp = document.getElementById('expiryDays');
+            if (val === 'Custom') {
+                inp.value = '';
+                inp.readOnly = false;
+                inp.placeholder = 'e.g., 1s, 5d, 2m, 1y, f';
+            } else {
+                const selected = cs.querySelector('.custom-select-option.selected');
+                const days = selected ? selected.dataset.days : '';
+                if (days) {
+                    inp.value = days;
+                    inp.readOnly = true;
+                } else {
+                    inp.value = '';
+                    inp.readOnly = true;
+                }
+            }
+        };
+
+        document.getElementById('licenseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const appId = document.getElementById('cs-licenseApp').dataset.value;
+            const type = document.getElementById('cs-licenseType').dataset.value;
+            const expiryInput = document.getElementById('expiryDays').value;
+            const note = document.getElementById('licenseNote').value || '';
+
+            if (!appId || !type) { alert('Select an application and license type.'); return; }
+
+            let ms;
+            if (type === 'Custom') {
+                ms = parseCustomTime(expiryInput);
+                if (!ms) { alert('Invalid format. Use: 1s, 5d, 2m, 1y, or f'); return; }
+            } else {
+                ms = parseInt(expiryInput) * 86400000;
+            }
+
+            const key = generateLicenseKey();
+            const license = {
+                key, type, note,
+                expiryDate: Date.now() + ms,
+                createdAt: Date.now(),
+                status: 'Not used'
+            };
+
+            try {
+                const licRef = ref(db, 'licenses/' + appId);
+                const newRef = push(licRef);
+                await set(newRef, license);
+                const appName = applications.find(a => a.id === appId)?.name || 'Unknown';
+                logEvent('creation', `License <strong>${key.substring(0,9)}...</strong> created for <strong>${appName}</strong>`, `Type: ${type}`);
+
+                document.getElementById('generatedKey').textContent = key;
+                document.getElementById('genKeyResult').style.display = 'block';
+                this.reset();
+                resetCustomSelect('cs-licenseApp', 'Select application...');
+                resetCustomSelect('cs-licenseType', 'Select type...');
+                document.getElementById('expiryDays').value = '';
+                document.getElementById('licenseNote').value = '';
+                
+                setTimeout(() => {
+                    document.getElementById('genKeyResult').style.display = 'none';
+                }, 5000);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        window.copyGenKey = function() {
+            navigator.clipboard.writeText(document.getElementById('generatedKey').textContent);
+            const btn = document.querySelector('.gen-key-box .copy-btn');
+            if (btn) animateCopyBtn(btn);
+        };
+
+        window.deleteLicense = async function(appId, licId) {
+            const license = allLicenses.find(l => l.appId === appId && l.id === licId);
+            showDeleteModal(
+                'Delete this license? This cannot be undone.',
+                license.key,
+                async function(data) {
+                    try { 
+                        await remove(ref(db, 'licenses/' + data.appId + '/' + data.licId));
+                        logEvent('deletion', `License <strong>${license.key.substring(0,9)}...</strong> deleted`, license.appName || 'Unknown');
+                    } catch(e) { 
+                        alert('Error: ' + e.message); 
+                    }
+                },
+                { appId, licId }
+            );
+        };
+
+        window.copyLicenseKey = function(key) {
+            navigator.clipboard.writeText(key);
+            // Find the button that triggered this via the event
+            const btns = document.querySelectorAll(`button[onclick="copyLicenseKey('${key}')"]`);
+            if (btns.length > 0) animateCopyBtn(btns[0]);
+        };
+
+        window.viewLicenseDetails = function(appId, licId) {
+            const license = allLicenses.find(l => l.appId === appId && l.id === licId);
+            if (!license) return;
+            
+            const app = applications.find(a => a.id === appId);
+            
+            // Populate modal fields
+            document.getElementById('detailAppName').textContent = app ? app.name : 'Unknown';
+            document.getElementById('detailLicenseKey').textContent = license.key;
+            document.getElementById('detailLicenseType').textContent = license.type;
+            document.getElementById('detailLicenseNote').textContent = license.note || 'None';
+            document.getElementById('detailLicenseHWID').textContent = license.hwid || 'Not set';
+            document.getElementById('detailLicenseCreated').textContent = formatDate(license.createdAt);
+            document.getElementById('detailLicenseExpires').textContent = formatDate(license.expiryDate);
+            document.getElementById('detailLicenseStatus').textContent = license.hwid ? 'Activated' : 'Unused';
+            document.getElementById('detailBanStatus').textContent = license.banned ? 'Banned' : 'Active';
+            
+            // Show modal
+            document.getElementById('licenseDetailsModal').style.display = 'flex';
+            
+            // Apply privacy blur if enabled
+            const privacyEnabled = localStorage.getItem('privacyEnabled') === 'true';
+            if (privacyEnabled) {
+                applyPrivacyBlur(true);
+            }
+        };
+
+        window.extendLicense = function(appId, licId) {
+            const license = allLicenses.find(l => l.appId === appId && l.id === licId);
+            if (!license) return;
+            
+            // Store current license data for later use
+            window.currentExtendLicense = { appId, licId, license };
+            
+            // Populate modal fields
+            document.getElementById('currentExpiry').textContent = formatDate(license.expiryDate);
+            document.getElementById('extendDays').value = '30';
+            updateNewExpiry();
+            
+            // Show modal
+            document.getElementById('extendLicenseModal').style.display = 'flex';
+            
+            // Add event listener for days input
+            document.getElementById('extendDays').addEventListener('input', updateNewExpiry);
+        };
+
+        window.updateNewExpiry = function() {
+            if (!window.currentExtendLicense) return;
+            
+            const days = parseInt(document.getElementById('extendDays').value) || 0;
+            const newExpiry = window.currentExtendLicense.license.expiryDate + (days * 24 * 60 * 60 * 1000);
+            document.getElementById('newExpiry').textContent = formatDate(newExpiry);
+        };
+
+        window.closeLicenseDetailsModal = function() {
+            document.getElementById('licenseDetailsModal').style.display = 'none';
+        };
+
+        window.closeExtendLicenseModal = function() {
+            document.getElementById('extendLicenseModal').style.display = 'none';
+            // Remove event listener
+            document.getElementById('extendDays').removeEventListener('input', updateNewExpiry);
+            window.currentExtendLicense = null;
+        };
+
+        window.confirmExtendLicense = function() {
+            if (!window.currentExtendLicense) return;
+            
+            const days = parseInt(document.getElementById('extendDays').value);
+            if (isNaN(days) || days <= 0) {
+                alert('Please enter a valid number of days.');
+                return;
+            }
+            
+            const { appId, licId } = window.currentExtendLicense;
+            const newExpiry = window.currentExtendLicense.license.expiryDate + (days * 24 * 60 * 60 * 1000);
+            const licRef = ref(db, `licenses/${appId}/${licId}`);
+            update(licRef, { expiryDate: newExpiry });
+            
+            closeExtendLicenseModal();
+        };
+
+        window.resetLicenseHWID = function(appId, licId) {
+            if (confirm('Reset HWID for this license? This will allow activation on a new device.')) {
+                const license = allLicenses.find(l => l.appId === appId && l.id === licId);
+                const licRef = ref(db, `licenses/${appId}/${licId}`);
+                update(licRef, { hwid: null, activatedAt: null });
+                logEvent('reset', `HWID reset for license <strong>${license ? license.key.substring(0,9) + '...' : licId}</strong>`, license?.appName || 'Unknown');
+            }
+        };
+
+        window.banLicense = function(appId, licId) {
+            const license = allLicenses.find(l => l.appId === appId && l.id === licId);
+            if (!license) return;
+            
+            const app = applications.find(a => a.id === appId);
+            const isBanned = license.banned;
+            
+            // Store current license data for later use
+            window.currentBanLicense = { appId, licId, license, isBanned };
+            
+            // Populate modal fields
+            document.getElementById('banModalTitle').textContent = isBanned ? 'Unban License' : 'Ban License';
+            document.getElementById('banModalMessage').textContent = isBanned 
+                ? 'This license will be usable again for authentication.' 
+                : 'This license will no longer be usable for authentication.';
+            document.getElementById('banLicenseKey').textContent = license.key;
+            document.getElementById('banAppName').textContent = app ? app.name : 'Unknown';
+            document.getElementById('banCurrentStatus').textContent = isBanned ? 'Banned' : 'Active';
+            document.getElementById('banReason').value = license.banReason || '';
+            document.getElementById('banReason').placeholder = isBanned 
+                ? 'Enter reason for unbanning this license...' 
+                : 'Enter reason for banning this license...';
+            
+            const confirmBtn = document.getElementById('banConfirmButton');
+            confirmBtn.textContent = isBanned ? 'Unban License' : 'Ban License';
+            
+            // Show modal
+            document.getElementById('banLicenseModal').style.display = 'flex';
+            
+            // Apply privacy blur if enabled
+            const privacyEnabled = localStorage.getItem('privacyEnabled') === 'true';
+            if (privacyEnabled) {
+                applyPrivacyBlur(true);
+            }
+        };
+
+        window.closeBanLicenseModal = function() {
+            document.getElementById('banLicenseModal').style.display = 'none';
+            document.getElementById('banReason').value = '';
+            window.currentBanLicense = null;
+        };
+
+        window.confirmBanLicense = function() {
+            if (!window.currentBanLicense) return;
+            
+            const { appId, licId, license, isBanned } = window.currentBanLicense;
+            const reason = document.getElementById('banReason').value.trim();
+            
+            const licRef = ref(db, `licenses/${appId}/${licId}`);
+            update(licRef, { 
+                banned: !isBanned,
+                banReason: !isBanned ? reason : null,
+                bannedAt: !isBanned ? Date.now() : null
+            });
+
+            if (isBanned) {
+                logEvent('unban', `License <strong>${license.key.substring(0,9)}...</strong> unbanned`, license.appName || 'Unknown');
+            } else {
+                logEvent('ban', `License <strong>${license.key.substring(0,9)}...</strong> banned`, reason || 'No reason provided');
+            }
+            
+            closeBanLicenseModal();
+        };
+
+        window.filterLicensesByApp = function() {
+            renderLicenseTable();
+        };
+
+        // ── Custom Dropdown Logic ────────────────────────
+        window.toggleDropdown = function(id) {
+            const cs = document.getElementById(id);
+            const trigger = cs.querySelector('.custom-select-trigger');
+            const opts = cs.querySelector('.custom-select-options');
+            const isOpen = opts.classList.contains('open');
+
+            // Close all other dropdowns first
+            closeAllDropdowns();
+
+            if (!isOpen) {
+                trigger.classList.add('open');
+                opts.classList.add('open');
+            }
+        };
+
+        window.selectOption = function(id, el) {
+            const cs = document.getElementById(id);
+            const trigger = cs.querySelector('.custom-select-trigger');
+            const textEl = trigger.querySelector('.cs-text');
+            const opts = cs.querySelector('.custom-select-options');
+
+            // Remove selected from all
+            opts.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+
+            // Set value and display text
+            cs.dataset.value = el.dataset.value;
+            textEl.textContent = el.textContent.trim().split('\n')[0].trim();
+            textEl.classList.remove('cs-placeholder');
+
+            // Close
+            trigger.classList.remove('open');
+            opts.classList.remove('open');
+
+            // Fire callbacks
+            if (id === 'cs-licenseType') updateExpiry();
+            if (id === 'cs-licenseFilter') filterLicensesByApp();
+        };
+
+        function resetCustomSelect(id, placeholder) {
+            const cs = document.getElementById(id);
+            if (!cs) return;
+            cs.dataset.value = '';
+            const textEl = cs.querySelector('.cs-text');
+            textEl.textContent = placeholder;
+            textEl.classList.add('cs-placeholder');
+            cs.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.custom-select-trigger.open').forEach(t => t.classList.remove('open'));
+            document.querySelectorAll('.custom-select-options.open').forEach(o => o.classList.remove('open'));
+        }
+
+        // Close dropdowns on outside click
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-select')) {
+                closeAllDropdowns();
+            }
+        });
+
+        function formatDate(ts) {
+            if (!ts) return 'N/A';
+            return new Date(ts).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function isExpired(d) {
+            if (!d) return false;
+            return d < Date.now();
+        }
+
+        function renderLicenseTable() {
+            const tbody = document.getElementById('licenseTableBody');
+            const filter = document.getElementById('cs-licenseFilter').dataset.value || 'all';
+            let filtered = filter === 'all' ? allLicenses : allLicenses.filter(l => l.appId === filter);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-td">No licenses yet</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(lic => {
+                let sc, st;
+                if (lic.banned) { sc = 'st-banned'; st = 'Banned'; }
+                else if (lic.status === 'Not used') { sc = 'st-unused'; st = 'Not used'; }
+                else if (isExpired(lic.expiryDate)) { sc = 'st-expired'; st = 'Expired'; }
+                else { sc = 'st-active'; st = 'Active'; }
+                const hwid = lic.hwid ? lic.hwid.substring(0,8) + '...' : '-';
+
+                return `<tr>
+                    <td><code class="key-code">${lic.key}</code></td>
+                    <td>${lic.appName || '-'}</td>
+                    <td>${lic.type}</td>
+                    <td class="td-muted">${lic.note || '-'}</td>
+                    <td class="td-muted"><code class="hwid-code privacy-sensitive">${hwid}</code></td>
+                    <td class="td-muted">${formatDate(lic.expiryDate)}</td>
+                    <td><span class="status-pill ${sc}">${st}</span></td>
+                    <td>
+                        <div class="row-actions">
+                            <button onclick="copyLicenseKey('${lic.key}')" class="btn-sm" title="Copy"><i data-lucide="copy"></i></button>
+                            <button onclick="viewLicenseDetails('${lic.appId}','${lic.id}')" class="btn-sm" title="View Details"><i data-lucide="eye"></i></button>
+                            <button onclick="extendLicense('${lic.appId}','${lic.id}')" class="btn-sm" title="Extend License"><i data-lucide="calendar-plus"></i></button>
+                            <button onclick="resetLicenseHWID('${lic.appId}','${lic.id}')" class="btn-sm" title="Reset HWID"><i data-lucide="refresh-cw"></i></button>
+                            <button onclick="banLicense('${lic.appId}','${lic.id}')" class="btn-sm" title="Ban License"><i data-lucide="shield-x"></i></button>
+                            <button onclick="deleteLicense('${lic.appId}','${lic.id}')" class="btn-sm btn-danger" title="Delete"><i data-lucide="trash-2"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        // ── Analytics ───────────────────────────────────
+        function updateAnalytics() {
+            const activated = allLicenses.filter(l => l.status === 'Used' && !isExpired(l.expiryDate)).length;
+            const unused = allLicenses.filter(l => l.status === 'Not used').length;
+            const expired = allLicenses.filter(l => isExpired(l.expiryDate)).length;
+            const total = allLicenses.length;
+            const rate = total > 0 ? Math.round((activated / total) * 100) : 0;
+
+            document.getElementById('anActivated').textContent = activated;
+            document.getElementById('anUnused').textContent = unused;
+            document.getElementById('anExpired').textContent = expired;
+            document.getElementById('anRate').textContent = rate + '%';
+
+            // Licenses by App breakdown
+            const appCounts = {};
+            allLicenses.forEach(l => {
+                const name = l.appName || 'Unknown';
+                appCounts[name] = (appCounts[name] || 0) + 1;
+            });
+            const barColors = ['bar-blue', 'bar-green', 'bar-purple', 'bar-amber', 'bar-red', 'bar-cyan'];
+            const appContainer = document.getElementById('appBreakdown');
+            if (Object.keys(appCounts).length === 0) {
+                appContainer.innerHTML = '<div class="empty-state"><i data-lucide="pie-chart"></i><p>No data yet</p></div>';
+            } else {
+                const maxApp = Math.max(...Object.values(appCounts));
+                appContainer.innerHTML = Object.entries(appCounts).map(([name, count], i) =>
+                    `<div class="breakdown-item">
+                        <span class="breakdown-label">${name}</span>
+                        <div class="breakdown-bar-wrap"><div class="breakdown-bar ${barColors[i % barColors.length]}" style="width:${(count/maxApp)*100}%"></div></div>
+                        <span class="breakdown-count">${count}</span>
+                    </div>`
+                ).join('');
+            }
+
+            // Licenses by Type breakdown
+            const typeCounts = {};
+            allLicenses.forEach(l => {
+                typeCounts[l.type] = (typeCounts[l.type] || 0) + 1;
+            });
+            const typeContainer = document.getElementById('typeBreakdown');
+            if (Object.keys(typeCounts).length === 0) {
+                typeContainer.innerHTML = '<div class="empty-state"><i data-lucide="bar-chart"></i><p>No data yet</p></div>';
+            } else {
+                const maxType = Math.max(...Object.values(typeCounts));
+                typeContainer.innerHTML = Object.entries(typeCounts).map(([type, count], i) =>
+                    `<div class="breakdown-item">
+                        <span class="breakdown-label">${type}</span>
+                        <div class="breakdown-bar-wrap"><div class="breakdown-bar ${barColors[(i+2) % barColors.length]}" style="width:${(count/maxType)*100}%"></div></div>
+                        <span class="breakdown-count">${count}</span>
+                    </div>`
+                ).join('');
+            }
+
+            // Recent Activations table
+            const activatedLics = allLicenses.filter(l => l.activatedAt).sort((a, b) => b.activatedAt - a.activatedAt).slice(0, 10);
+            const actBody = document.getElementById('recentActivationsBody');
+            if (activatedLics.length === 0) {
+                actBody.innerHTML = '<tr><td colspan="5" class="empty-td">No activations yet</td></tr>';
+            } else {
+                actBody.innerHTML = activatedLics.map(lic => {
+                    const hwid = lic.hwid ? lic.hwid.substring(0,12) + '...' : '-';
+                    return `<tr>
+                        <td><code class="key-code" style="font-size:0.65rem;">${lic.key}</code></td>
+                        <td>${lic.appName || '-'}</td>
+                        <td class="td-muted"><code class="hwid-code privacy-sensitive">${hwid}</code></td>
+                        <td class="td-muted">${formatDate(lic.activatedAt)}</td>
+                        <td class="td-muted">${formatDate(lic.expiryDate)}</td>
+                    </tr>`;
+                }).join('');
+            }
+
+            lucide.createIcons();
+        }
+
+        // ── Activity Log (persisted to Firebase) ────────
+        let activityEvents = [];
+
+        async function logEvent(type, text, detail) {
+            if (!currentUser) return;
+            console.log(`[Activity] ${type}: ${text}`);
+            const dotMap = { creation: 'dot-blue', activation: 'dot-green', expiry: 'dot-red', deletion: 'dot-orange', ban: 'dot-red', unban: 'dot-green', app: 'dot-purple', reset: 'dot-orange' };
+            const ev = {
+                type,
+                text,
+                detail: detail || '',
+                time: Date.now(),
+                dot: dotMap[type] || 'dot-blue'
+            };
+            try {
+                const logRef = ref(db, 'activityLogs/' + currentUser.uid);
+                await push(logRef, ev);
+                console.log('[Activity] Saved to Firebase');
+            } catch (e) {
+                console.error('Failed to save activity log:', e);
+            }
+            // Send to webhook immediately
+            sendToWebhook([ev]);
+        }
+
+        let lastProcessedLicenses = new Set();
+
+        function loadLicenses(appId) {
+            const licRef = ref(db, 'licenses/' + appId);
+            onValue(licRef, (snapshot) => {
+                allLicenses = [];
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    for (const [id, lic] of Object.entries(data)) {
+                        allLicenses.push({ id, appId, appName: applications.find(a => a.id === appId)?.name || 'Unknown', ...lic });
+                    }
+                }
+                renderLicenseTable();
+                detectLicenseEvents();
+            });
+        }
+
+        function loadActivityLogs(uid) {
+            const logRef = ref(db, 'activityLogs/' + uid);
+            onValue(logRef, (snapshot) => {
+                activityEvents = [];
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    for (const [id, ev] of Object.entries(data)) {
+                        activityEvents.push({ id, ...ev });
+                    }
+                }
+                activityEvents.sort((a, b) => b.time - a.time);
+                renderActivityLog();
+                detectLicenseEvents();
+            });
+        }
+
+        function detectLicenseEvents() {
+            console.log('Detecting license events...');
+            allLicenses.forEach(lic => {
+                const licKey = lic.appId + ':' + lic.id;
+                
+                // Detect activation
+                if (lic.activatedAt && !lastProcessedLicenses.has(licKey + ':activated:' + lic.activatedAt)) {
+                    logEvent('activation', `License <strong>${lic.key.substring(0,9)}...</strong> activated on device <strong>${lic.hwid ? lic.hwid.substring(0,8) + '...' : '—'}</strong>`, lic.appName || 'Unknown');
+                    lastProcessedLicenses.add(licKey + ':activated:' + lic.activatedAt);
+                }
+                
+                // Detect expiry
+                if (lic.expiryDate && isExpired(lic.expiryDate) && !lastProcessedLicenses.has(licKey + ':expired:' + lic.expiryDate)) {
+                    logEvent('expiry', `License <strong>${lic.key.substring(0,9)}...</strong> expired`, lic.appName || 'Unknown');
+                    lastProcessedLicenses.add(licKey + ':expired:' + lic.expiryDate);
+                }
+            });
+        }
+
+        function renderActivityLog() {
+            const filter = document.getElementById('cs-activityFilter').dataset.value || 'all';
+            const filtered = filter === 'all' ? activityEvents : activityEvents.filter(e => e.type === filter);
+
+            const container = document.getElementById('activityTimeline');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i data-lucide="scroll-text"></i><p>No activity yet. Events will appear here as you use Kova Auth.</p></div>';
+            } else {
+                container.innerHTML = filtered.slice(0, 100).map(ev =>
+                    `<div class="activity-event">
+                        <div class="activity-dot ${ev.dot || 'dot-blue'}"></div>
+                        <div class="activity-content">
+                            <div class="activity-text">${ev.text}</div>
+                            <div class="activity-meta">${formatDateTime(ev.time)} · ${ev.detail}</div>
+                        </div>
+                    </div>`
+                ).join('');
+            }
+            lucide.createIcons();
+        }
+
+        window.clearActivityLog = async function() {
+            showDeleteModal(
+                'Clear all activity logs? This cannot be undone.',
+                'Activity Logs',
+                async function() {
+                    try {
+                        await remove(ref(db, 'activityLogs/' + currentUser.uid));
+                    } catch (e) {
+                        alert('Error clearing logs: ' + e.message);
+                    }
+                }
+            );
+        };
+
+        window.filterActivity = function() {
+            renderActivityLog();
+        };
+
+        // Hook activity filter into selectOption
+        const origSelectOption = window.selectOption;
+        window.selectOption = function(id, el) {
+            origSelectOption(id, el);
+            if (id === 'cs-activityFilter') renderActivityLog();
+        };
+
+        function formatDateTime(ts) {
+            if (!ts) return 'N/A';
+            return new Date(ts).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ── Webhook Tab ───────────────────────────────────
+        let webhookCustomization = {
+            creation: { icon: '🔑', title: 'License Created', footer: 'Kova Auth' },
+            activation: { icon: '✅', title: 'License Activated', footer: 'Kova Auth' },
+            expiry: { icon: '⏰', title: 'License Expired', footer: 'Kova Auth' },
+            deletion: { icon: '🗑️', title: 'Deleted', footer: 'Kova Auth' },
+            ban: { icon: '🔨', title: 'License Banned', footer: 'Kova Auth' },
+            unban: { icon: '🔓', title: 'License Unbanned', footer: 'Kova Auth' },
+            app: { icon: '📦', title: 'Application', footer: 'Kova Auth' },
+            reset: { icon: '🔄', title: 'HWID Reset', footer: 'Kova Auth' }
+        };
+
+        let currentEventTab = 'creation';
+
+        window.selectEventTab = function(eventType) {
+            currentEventTab = eventType;
+            
+            // Update active tab
+            document.querySelectorAll('.event-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-event="${eventType}"]`).classList.add('active');
+            
+            // Update form fields
+            const custom = webhookCustomization[eventType];
+            document.getElementById('creationIcon').value = custom.icon;
+            document.getElementById('creationTitle').value = custom.title;
+            document.getElementById('creationFooter').value = custom.footer;
+            
+            // Update header
+            const titles = {
+                creation: 'License Created',
+                activation: 'License Activated', 
+                expiry: 'License Expired',
+                deletion: 'Deleted',
+                app: 'Application'
+            };
+            document.getElementById('selectedEventTitle').textContent = titles[eventType] || eventType;
+            
+                        
+            // Update preview
+            updatePreview();
+        };
+
+        window.setIcon = function(icon) {
+            document.getElementById('creationIcon').value = icon;
+            updatePreview();
+        };
+
+        window.updatePreview = function() {
+            const icon = document.getElementById('creationIcon').value;
+            const title = document.getElementById('creationTitle').value;
+            const footer = document.getElementById('creationFooter').value;
+            
+            // Update current event customization
+            webhookCustomization[currentEventTab] = { icon, title, footer };
+            
+            // Update preview
+            const sampleEvent = {
+                type: currentEventTab,
+                text: currentEventTab === 'app' 
+                    ? `Application <strong>MyApp</strong> created`
+                    : `License <strong>ABC123-DEF...</strong> ${currentEventTab === 'creation' ? 'created' : currentEventTab === 'activation' ? 'activated' : currentEventTab === 'expiry' ? 'expired' : 'deleted'} for <strong>MyApp</strong>`,
+                detail: currentEventTab === 'app' ? 'Version: 1.0' : 'Type: Premium',
+                time: Date.now()
+            };
+            
+            renderDiscordPreview([sampleEvent]);
+        };
+
+        window.saveWebhookCustomization = async function() {
+            try {
+                const uid = auth.currentUser.uid;
+                await update(ref(db, 'users/' + uid), { webhookCustomization });
+                showWebhookStatus('Customization saved!', '#10b981');
+                previewAllEmbeds();
+            } catch (e) {
+                showWebhookStatus('Error saving customization: ' + e.message, '#ef4444');
+            }
+        };
+
+        window.resetWebhookCustomization = async function() {
+            const defaults = {
+                creation: { icon: '🔑', title: 'License Created', footer: 'Kova Auth' },
+                activation: { icon: '✅', title: 'License Activated', footer: 'Kova Auth' },
+                expiry: { icon: '⏰', title: 'License Expired', footer: 'Kova Auth' },
+                deletion: { icon: '🗑️', title: 'Deleted', footer: 'Kova Auth' },
+                ban: { icon: '🔨', title: 'License Banned', footer: 'Kova Auth' },
+                unban: { icon: '🔓', title: 'License Unbanned', footer: 'Kova Auth' },
+                app: { icon: '📦', title: 'Application', footer: 'Kova Auth' },
+                reset: { icon: '🔄', title: 'HWID Reset', footer: 'Kova Auth' }
+            };
+            
+            Object.keys(defaults).forEach(type => {
+                document.getElementById(type + 'Icon').value = defaults[type].icon;
+                document.getElementById(type + 'Title').value = defaults[type].title;
+                document.getElementById(type + 'Footer').value = defaults[type].footer;
+            });
+            
+            webhookCustomization = defaults;
+            await saveWebhookCustomization();
+        };
+
+        window.previewAllEmbeds = function() {
+            const sampleEvents = [
+                { type: 'creation', text: 'License <strong>ABC123-DEF...</strong> created for <strong>MyApp</strong>', detail: 'Type: Premium', time: Date.now() },
+                { type: 'activation', text: 'License <strong>ABC123-DEF...</strong> activated on device <strong>A1B2C3D4...</strong>', detail: 'MyApp', time: Date.now() },
+                { type: 'expiry', text: 'License <strong>ABC123-DEF...</strong> expired', detail: 'MyApp', time: Date.now() },
+                { type: 'deletion', text: 'License <strong>ABC123-DEF...</strong> deleted', detail: 'MyApp', time: Date.now() },
+                { type: 'app', text: 'Application <strong>MyApp</strong> created', detail: 'Version: 1.0', time: Date.now() }
+            ];
+            
+            renderDiscordPreview(sampleEvents);
+        };
+
+        function renderDiscordPreview(events) {
+            const preview = document.getElementById('embedPreview');
+            const isDarkMode = document.getElementById('darkModeToggle').checked;
+            
+            preview.innerHTML = events.map(ev => {
+                const custom = webhookCustomization[ev.type] || { icon: '📋', title: ev.type, footer: 'Kova Auth' };
+                const desc = ev.text.replace(/<strong>/g, '**').replace(/<\/strong>/g, '**').replace(/<[^>]+>/g, '');
+                
+                return `
+                    <div class="discord-embed ${ev.type}">
+                        <div class="discord-embed-title">
+                            <span>${custom.icon}</span>
+                            <span>${custom.title}</span>
+                        </div>
+                        <div class="discord-embed-description">${desc}</div>
+                        <div class="discord-embed-footer">
+                            <span>${custom.footer}</span>
+                            <span class="discord-embed-timestamp">Today at ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Apply dark/light mode
+            const previewContainer = document.getElementById('discordPreview');
+            if (isDarkMode) {
+                previewContainer.classList.remove('light-mode');
+            } else {
+                previewContainer.classList.add('light-mode');
+            }
+            
+            lucide.createIcons();
+        }
+
+        // Dark mode toggle
+        document.getElementById('darkModeToggle')?.addEventListener('change', function() {
+            previewAllEmbeds();
+        });
+
+        // Load webhook customization
+        async function loadWebhookCustomization() {
+            if (!userProfile) return;
+            
+            if (userProfile.webhookCustomization) {
+                webhookCustomization = userProfile.webhookCustomization;
+            }
+            
+            // Load the first tab (creation) into the form
+            selectEventTab('creation');
+            
+            // Update webhook status indicator
+            updateWebhookStatusIndicator();
+            
+            // Show initial preview
+            previewAllEmbeds();
+        }
+
+        function updateWebhookStatusIndicator() {
+            const indicator = document.getElementById('webhookStatusIndicator');
+            const statusDot = indicator.querySelector('.status-dot');
+            const statusText = indicator.querySelector('span');
+            
+            if (userProfile && userProfile.discordWebhook) {
+                statusDot.classList.remove('status-offline');
+                statusDot.classList.add('status-online');
+                statusText.textContent = 'Connected';
+            } else {
+                statusDot.classList.remove('status-online');
+                statusDot.classList.add('status-offline');
+                statusText.textContent = 'Not Configured';
+            }
+        }
+
+        // ── Settings ────────────────────────────────────
+        function updateSettings() {
+            if (!userProfile) return;
+            document.getElementById('settingsUsername').textContent = userProfile.username || '—';
+            document.getElementById('settingsEmail').textContent = userProfile.email || '—';
+            document.getElementById('settingsOwnerId').textContent = userProfile.ownerId || '—';
+            const isPremium = userProfile.plan === 'premium';
+            document.getElementById('settingsPlan').textContent = isPremium ? 'Premium' : 'Free';
+            document.getElementById('settingsCreated').textContent = userProfile.createdAt ? formatDate(userProfile.createdAt) : '—';
+            
+            // Disable upgrade buttons for premium users
+            const upgradeButtons = document.querySelectorAll('a[href*="discord.gg/qs2CJhbdqd"]');
+            upgradeButtons.forEach(button => {
+                const buttonText = button.textContent.toLowerCase();
+                const isUpgradeButton = buttonText.includes('upgrade') || 
+                                       button.parentElement.querySelector('h4')?.textContent.toLowerCase().includes('upgrade');
+                
+                if (isUpgradeButton) {
+                    if (isPremium) {
+                        button.style.opacity = '1';
+                        button.style.pointerEvents = 'none';
+                        button.style.textDecoration = 'none';
+                        button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                        button.style.cursor = 'default';
+                        button.setAttribute('title', 'You already have Premium!');
+                        
+                        // Update button text if it's the main upgrade button
+                        if (button.textContent.includes('Upgrade')) {
+                            button.innerHTML = '<i data-lucide="crown"></i> Premium';
+                            button.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.3)';
+                        }
+                    } else {
+                        button.style.opacity = '1';
+                        button.style.pointerEvents = 'auto';
+                        button.style.background = '';
+                        button.style.boxShadow = '';
+                        button.style.cursor = 'pointer';
+                        button.removeAttribute('title');
+                        
+                        // Restore original button text if needed
+                        if (button.textContent.includes('Premium')) {
+                            button.innerHTML = '<i data-lucide="star"></i> Upgrade';
+                        }
+                    }
+                }
+            });
+            
+            // Hide upgrade warning for premium users
+            const upgradeWarning = document.getElementById('limitWarning');
+            if (upgradeWarning && isPremium) {
+                upgradeWarning.style.display = 'none';
+            }
+
+            // Load webhook URL into input
+            const webhookInput = document.getElementById('webhookUrlInput');
+            if (webhookInput && userProfile.discordWebhook) {
+                webhookInput.value = userProfile.discordWebhook;
+            }
+            
+            // Load webhook customization
+            loadWebhookCustomization();
+        }
+
+        // ── Discord Webhook Logging ────────────────────
+        function showWebhookStatus(msg, color) {
+            const el = document.getElementById('webhookStatus');
+            el.textContent = msg;
+            el.style.color = color;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 4000);
+        }
+
+        window.saveWebhook = async function() {
+            const url = document.getElementById('webhookUrlInput').value.trim();
+            if (!url) {
+                showWebhookStatus('Please enter a webhook URL.', '#ef4444');
+                return;
+            }
+            if (!url.startsWith('https://discord.com/api/webhooks/')) {
+                showWebhookStatus('Invalid webhook URL. Must start with https://discord.com/api/webhooks/', '#ef4444');
+                return;
+            }
+            try {
+                const uid = auth.currentUser.uid;
+                await update(ref(db, 'users/' + uid), { discordWebhook: url });
+                userProfile.discordWebhook = url;
+                showWebhookStatus('Webhook saved successfully!', '#10b981');
+            } catch (e) {
+                showWebhookStatus('Error saving webhook: ' + e.message, '#ef4444');
+            }
+        };
+
+        window.testWebhook = async function() {
+            const url = document.getElementById('webhookUrlInput').value.trim();
+            if (!url) {
+                showWebhookStatus('Save a webhook URL first.', '#ef4444');
+                return;
+            }
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        embeds: [{
+                            title: '✅ Webhook Connected',
+                            description: 'Kova Auth activity logs will be sent to this channel.',
+                            color: 0x10b981,
+                            footer: { text: 'Kova Auth' },
+                            timestamp: new Date().toISOString()
+                        }]
+                    })
+                });
+                if (res.ok || res.status === 204) {
+                    showWebhookStatus('Test message sent! Check your Discord channel.', '#10b981');
+                } else {
+                    showWebhookStatus('Webhook returned error: ' + res.status, '#ef4444');
+                }
+            } catch (e) {
+                showWebhookStatus('Failed to send test: ' + e.message, '#ef4444');
+            }
+        };
+
+        window.removeWebhook = async function() {
+            try {
+                const uid = auth.currentUser.uid;
+                await update(ref(db, 'users/' + uid), { discordWebhook: null });
+                userProfile.discordWebhook = null;
+                document.getElementById('webhookUrlInput').value = '';
+                showWebhookStatus('Webhook removed.', '#888');
+            } catch (e) {
+                showWebhookStatus('Error removing webhook: ' + e.message, '#ef4444');
+            }
+        };
+
+        async function sendToWebhook(events) {
+            if (!userProfile || !userProfile.discordWebhook) {
+                console.log('[Webhook] Not configured, skipping');
+                return;
+            }
+            const url = userProfile.discordWebhook;
+            console.log(`[Webhook] Sending ${events.length} event(s)`);
+
+            const colorMap = { creation: 0x3b82f6, activation: 0x10b981, expiry: 0xef4444, deletion: 0xf97316, ban: 0xef4444, unban: 0x10b981, app: 0xf59e0b, reset: 0xf97316 };
+
+            const embeds = events.slice(0, 10).map(ev => {
+                const custom = webhookCustomization[ev.type] || { icon: '📋', title: ev.type, footer: 'Kova Auth' };
+                // Convert <strong>text</strong> to **text**
+                const desc = ev.text.replace(/<strong>/g, '**').replace(/<\/strong>/g, '**').replace(/<[^>]+>/g, '');
+                return {
+                    title: `${custom.icon} ${custom.title}`,
+                    description: desc,
+                    color: colorMap[ev.type] || 0x888888,
+                    footer: { text: ev.detail || custom.footer },
+                    timestamp: ev.time ? new Date(ev.time).toISOString() : new Date().toISOString()
+                };
+            });
+
+            if (embeds.length === 0) return;
+
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ embeds })
+                });
+            } catch (e) {
+                console.error('Webhook send failed:', e);
+            }
+        }
+
+        window.resetAllLicenses = async function() {
+            showDeleteModal(
+                'Delete ALL licenses across all applications? This cannot be undone.',
+                'All licenses',
+                async function() {
+                    try {
+                        for (const app of applications) {
+                            await remove(ref(db, 'licenses/' + app.id));
+                        }
+                        logEvent('deletion', `All licenses reset across <strong>${applications.length}</strong> application(s)`, 'Bulk reset');
+                    } catch(error) {
+                        alert('Error: ' + error.message);
+                    }
+                }
+            );
+        };
+
+        window.deleteAllApps = async function() {
+            showDeleteModal(
+                'Delete ALL applications and their licenses? This cannot be undone.',
+                'All applications',
+                async function() {
+                    try {
+                        const appCount = applications.length;
+                        await remove(ref(db, 'applications/' + currentUser.uid));
+                        for (const app of applications) {
+                            await remove(ref(db, 'licenses/' + app.id));
+                        }
+                        logEvent('deletion', `All <strong>${appCount}</strong> application(s) and their licenses deleted`, 'Bulk delete');
+                        alert('All applications and licenses deleted.');
+                    } catch(error) {
+                        alert('Error: ' + error.message);
+                    }
+                }
+            );
+        };
+
+        // ── Hook into existing data flow ────────────────
+        // Patch updateLicenseUI to also update analytics + activity
+        const origUpdateLicenseUI = updateLicenseUI;
+        updateLicenseUI = function() {
+            origUpdateLicenseUI();
+            updateAnalytics();
+            updateSettings();
+        };
+
+        // Also update settings on profile load
+        const origLoadUserProfile = loadUserProfile;
+        loadUserProfile = async function(uid) {
+            await origLoadUserProfile(uid);
+            updateSettings();
+            loadPfp();
+            loadExistingReview();
+        };
+
+        // ── Profile Picture ─────────────────────────────
+        function loadPfp() {
+            if (!userProfile) return;
+            const pfp = userProfile.profilePicture;
+            if (pfp) {
+                showPfp(pfp);
+            }
+        }
+
+        function showPfp(dataUrl) {
+            const img = document.getElementById('pfpImage');
+            const icon = document.getElementById('pfpPlaceholderIcon');
+            img.src = dataUrl;
+            img.style.display = 'block';
+            if (icon) icon.style.display = 'none';
+            document.getElementById('removePfpBtn').style.display = 'inline-flex';
+
+            // Update sidebar avatar
+            const avatar = document.getElementById('sidebarAvatar');
+            avatar.classList.add('has-pfp');
+            avatar.innerHTML = `<img src="${dataUrl}" alt="PFP">`;
+        }
+
+        function clearPfp() {
+            const img = document.getElementById('pfpImage');
+            const icon = document.getElementById('pfpPlaceholderIcon');
+            img.src = '';
+            img.style.display = 'none';
+            if (icon) icon.style.display = '';
+            document.getElementById('removePfpBtn').style.display = 'none';
+
+            const avatar = document.getElementById('sidebarAvatar');
+            avatar.classList.remove('has-pfp');
+            avatar.innerHTML = '<i data-lucide="user"></i>';
+            lucide.createIcons();
+        }
+
+        window.handlePfpUpload = async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Image must be under 2MB.');
+                return;
+            }
+
+            // Resize to 128x128 and compress
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 128;
+            canvas.height = 128;
+
+            const img = new Image();
+            img.onload = async function() {
+                // Crop to square (center)
+                const size = Math.min(img.width, img.height);
+                const sx = (img.width - size) / 2;
+                const sy = (img.height - size) / 2;
+                ctx.drawImage(img, sx, sy, size, size, 0, 0, 128, 128);
+
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                try {
+                    await update(ref(db, 'users/' + currentUser.uid), { profilePicture: dataUrl });
+                    userProfile.profilePicture = dataUrl;
+                    showPfp(dataUrl);
+                } catch (err) {
+                    alert('Failed to save: ' + err.message);
+                }
+            };
+            img.src = URL.createObjectURL(file);
+        };
+
+        window.removePfp = async function() {
+            try {
+                await update(ref(db, 'users/' + currentUser.uid), { profilePicture: null });
+                userProfile.profilePicture = null;
+                clearPfp();
+            } catch (err) {
+                alert('Failed to remove: ' + err.message);
+            }
+        };
+
+        // ── Review System ───────────────────────────────
+        let selectedRating = 0;
+
+        window.setRating = function(val) {
+            selectedRating = val;
+            document.querySelectorAll('#reviewStars .star').forEach(s => {
+                const sv = parseInt(s.dataset.val);
+                if (sv <= val) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+        };
+
+        async function loadExistingReview() {
+            if (!currentUser) return;
+            try {
+                const snap = await get(ref(db, 'reviews/' + currentUser.uid));
+                if (snap.exists()) {
+                    const rev = snap.val();
+                    setRating(rev.rating);
+                    document.getElementById('reviewText').value = rev.text || '';
+                    document.getElementById('submitReviewBtn').innerHTML = '<i data-lucide="refresh-cw"></i> Update Review';
+                    lucide.createIcons();
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        // ── Profanity Filter ────────────────────────────
+        const _blockedWords = [
+            'fuck','shit','bitch','ass','damn','cunt','dick','cock','pussy','bastard',
+            'whore','slut','fag','faggot','nigger','nigga','retard','retarded',
+            'twat','wanker','piss','bollocks','crap','douche','motherfucker',
+            'bullshit','asshole','arsehole','jackass','dumbass','dipshit','shithead',
+            'negro','chink','spic','wetback','kike','gook','tranny','dyke',
+            'stfu','gtfo','milf','thot','incel','simp'
+        ];
+        const _blockedRegex = new RegExp(
+            _blockedWords.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),
+            'i'
+        );
+        function containsProfanity(text) {
+            const cleaned = text.replace(/[^a-zA-Z\s]/g, ' ');
+            return _blockedRegex.test(cleaned) || _blockedRegex.test(text);
+        }
+
+        window.submitReview = async function() {
+            if (!currentUser || !userProfile) { alert('You must be logged in.'); return; }
+            if (selectedRating === 0) { alert('Please select a star rating.'); return; }
+            const text = document.getElementById('reviewText').value.trim();
+            if (!text) { alert('Please write a review.'); return; }
+            if (containsProfanity(text)) { alert('Your review contains inappropriate language. Please revise it.'); return; }
+
+            const review = {
+                username: userProfile.username || 'Anonymous',
+                rating: selectedRating,
+                text: text,
+                profilePicture: userProfile.profilePicture || null,
+                createdAt: Date.now()
+            };
+
+            try {
+                await set(ref(db, 'reviews/' + currentUser.uid), review);
+                const msg = document.getElementById('reviewMsg');
+                msg.textContent = 'Review submitted! It will appear on the homepage.';
+                msg.style.display = 'inline';
+                document.getElementById('submitReviewBtn').innerHTML = '<i data-lucide="refresh-cw"></i> Update Review';
+                lucide.createIcons();
+                setTimeout(() => { msg.style.display = 'none'; }, 4000);
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        };
+
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            
+            // Hide loading page after everything is loaded
+            setTimeout(() => {
+                const loadingPage = document.getElementById('loadingPage');
+                if (loadingPage) {
+                    loadingPage.classList.add('fade-out');
+                    setTimeout(() => {
+                        loadingPage.style.display = 'none';
+                    }, 500);
+                }
+            }, 1500); // Show loading for at least 1.5 seconds
+
+            document.querySelectorAll('.nav-item').forEach(function(item) {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var tab = this.getAttribute('data-tab');
+                    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+                    item.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(function(t) { t.style.display = 'none'; });
+                    document.getElementById(tab + '-tab').style.display = 'block';
+                    var titles = { dashboard: 'Dashboard', applications: 'Applications', licenses: 'Licenses', analytics: 'Analytics', activity: 'Activity', webhook: 'Webhook', settings: 'Settings' };
+                    document.querySelector('.page-title').textContent = titles[tab];
+                    lucide.createIcons();
+                });
+            });
+
+            // Load privacy setting from localStorage
+            const privacyEnabled = localStorage.getItem('privacyEnabled') === 'true';
+            if (privacyEnabled) {
+                document.getElementById('privacyToggle').classList.add('active');
+                applyPrivacyBlur(true);
+            }
+        });
+
+        function togglePrivacy() {
+            const toggle = document.getElementById('privacyToggle');
+            const isEnabled = toggle.classList.toggle('active');
+            
+            // Save preference to localStorage
+            localStorage.setItem('privacyEnabled', isEnabled);
+            
+            // Apply or remove blur effect
+            applyPrivacyBlur(isEnabled);
+        }
+
+        function applyPrivacyBlur(enabled) {
+            const sensitiveElements = document.querySelectorAll('.privacy-sensitive');
+            sensitiveElements.forEach(function(element) {
+                if (enabled) {
+                    element.classList.add('privacy-blur');
+                } else {
+                    element.classList.remove('privacy-blur');
+                }
+            });
+            
+            // Also apply to any dynamically created application owner IDs
+            const appOwnerIds = document.querySelectorAll('.app-card-meta code:not(.privacy-sensitive)');
+            appOwnerIds.forEach(function(element) {
+                if (element.textContent && element.textContent.length > 10) {
+                    element.classList.add('privacy-sensitive');
+                    if (enabled) {
+                        element.classList.add('privacy-blur');
+                    }
+                }
+            });
+        }
+
+        // Custom Delete Modal Functions
+        let deleteCallback = null;
+        let deleteData = null;
+
+        window.showDeleteModal = function(message, itemText, callback, data) {
+            deleteCallback = callback;
+            deleteData = data;
+            
+            document.getElementById('deleteMessage').textContent = message;
+            
+            const itemElement = document.getElementById('deleteItem');
+            if (itemText) {
+                itemElement.textContent = itemText;
+                itemElement.style.display = 'block';
+            } else {
+                itemElement.style.display = 'none';
+            }
+            
+            const modal = document.getElementById('deleteModal');
+            modal.classList.add('active');
+            lucide.createIcons();
+        };
+
+        window.closeDeleteModal = function() {
+            const modal = document.getElementById('deleteModal');
+            modal.classList.remove('active');
+            deleteCallback = null;
+            deleteData = null;
+        };
+
+        window.confirmDelete = function() {
+            if (deleteCallback) {
+                deleteCallback(deleteData);
+            }
+            closeDeleteModal();
+        };
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('deleteModal');
+                if (modal.classList.contains('active')) {
+                    closeDeleteModal();
+                }
+            }
+        });
+
+        // Close modal on background click
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDeleteModal();
+            }
+        });
+
+    </script>
+</body>
+</html>
