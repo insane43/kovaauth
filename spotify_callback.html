@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Authorization Callback</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1db954 0%, #191414 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #1db954;
+            margin-top: 0;
+        }
+        .code-box {
+            background: #f5f5f5;
+            border: 2px solid #1db954;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+            min-height: 50px;
+        }
+        button {
+            background: #1db954;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #1ed760;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Spotify Authorization</h1>
+        <div id="content"></div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const error = urlParams.get('error');
+
+        const content = document.getElementById('content');
+
+        if (error) {
+            content.innerHTML = `
+                <p class="error">Authorization failed: ${error}</p>
+                <p>Please try again.</p>
+            `;
+        } else if (code) {
+            content.innerHTML = `
+                <p>Authorization successful! Copy this code:</p>
+                <div class="code-box" id="codeBox">${code}</div>
+                <button onclick="copyCode()">Copy Code</button>
+                <p id="copyStatus" style="margin-top: 10px; color: #1db954;"></p>
+            `;
+            
+            function copyCode() {
+                const codeBox = document.getElementById('codeBox');
+                const text = codeBox.innerText;
+                
+                navigator.clipboard.writeText(text).then(() => {
+                    document.getElementById('copyStatus').innerText = 'Code copied to clipboard!';
+                    setTimeout(() => {
+                        document.getElementById('copyStatus').innerText = '';
+                    }, 2000);
+                }).catch(err => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    document.getElementById('copyStatus').innerText = 'Code copied to clipboard!';
+                    setTimeout(() => {
+                        document.getElementById('copyStatus').innerText = '';
+                    }, 2000);
+                });
+            }
+        } else {
+            content.innerHTML = `
+                <p class="error">No authorization code found in URL.</p>
+                <p>Please authorize through the application again.</p>
+            `;
+        }
+    </script>
+</body>
+</html>
