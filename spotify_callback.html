@@ -3,63 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Authorization Callback</title>
+    <title>Spotify Authorization - Kova Auth</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #050505;
+            --surface: #0a0a0a;
+            --border: #1a1a1a;
+            --border-hover: #2a2a2a;
+            --text: #f5f5f5;
+            --text-dim: #888;
+            --text-muted: #555;
+            --accent: #fff;
+            --spotify-green: #1db954;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1db954 0%, #191414 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
+
+        /* Grid background */
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        .grid-bg::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+            filter: blur(60px);
+        }
+
+        .page { position: relative; z-index: 1; }
         .container {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            background: var(--surface);
+            padding: 48px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             max-width: 500px;
             text-align: center;
         }
+
         h1 {
-            color: #1db954;
-            margin-top: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text);
         }
+
+        p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
         .code-box {
-            background: #f5f5f5;
-            border: 2px solid #1db954;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 20px 0;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
             word-break: break-all;
-            font-family: monospace;
-            font-size: 14px;
-            min-height: 50px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            min-height: 60px;
+            color: var(--accent);
+            line-height: 1.5;
         }
+
         button {
-            background: #1db954;
+            background: var(--spotify-green);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 16px;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.25s;
+            font-family: inherit;
         }
         button:hover {
             background: #1ed760;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(29,185,84,0.3);
         }
+
         .error {
-            color: #e74c3c;
-            font-weight: bold;
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        #copyStatus {
+            margin-top: 16px;
+            font-size: 0.875rem;
+            color: var(--spotify-green);
+            font-weight: 500;
+        }
+
+        .icon-wrapper {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--spotify-green), #191414);
+            border-radius: 16px;
+        }
+        .icon-wrapper svg {
+            width: 32px;
+            height: 32px;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Spotify Authorization</h1>
-        <div id="content"></div>
+    <div class="grid-bg"></div>
+    <div class="page">
+        <div class="container">
+            <div class="icon-wrapper">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+                </svg>
+            </div>
+            <h1>Spotify Authorization</h1>
+            <div id="content"></div>
+        </div>
     </div>
 
     <script>
