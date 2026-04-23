@@ -1,0 +1,50 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      },
+      ".read": true,
+      ".write": false
+    },
+    
+    "applications": {
+      "$uid": {
+        ".read": true,
+        ".write": "$uid === auth.uid"
+      },
+      ".read": true,
+      ".write": false
+    },
+    
+    "licenses": {
+      "$appId": {
+        ".read": true,
+        ".write": true
+      },
+      ".read": true,
+      ".write": false
+    },
+    
+    "status": {
+      ".read": true,
+      ".write": false,
+      "uptime": {
+        ".read": true,
+        ".write": "auth != null"
+      },
+      "version": {
+        ".read": true,
+        ".write": false
+      },
+      "maintenance": {
+        ".read": true,
+        ".write": "auth != null"
+      }
+    }
+  }
+}

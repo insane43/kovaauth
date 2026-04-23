@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Kova Auth</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #050505;
+            color: #f5f5f5;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .grid-bg {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 0 24px;
+            background: rgba(5,5,5,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .nav-inner {
+            max-width: 1100px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+            height: 56px;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 700; font-size: 1rem; color: #f5f5f5;
+            text-decoration: none; letter-spacing: 0.08em;
+        }
+        .nav-links { display: flex; align-items: center; gap: 8px; }
+        .nav-link {
+            padding: 6px 14px; border-radius: 6px; font-size: 0.8rem;
+            font-weight: 600; text-decoration: none; transition: all 0.15s;
+            color: #666; border: none; background: transparent; cursor: pointer;
+        }
+        .nav-link:hover { color: #fff; }
+        .nav-link-fill {
+            color: #000; background: #fff; font-size: 0.8rem;
+            padding: 6px 16px; border-radius: 6px; font-weight: 600;
+            text-decoration: none; transition: all 0.15s;
+        }
+        .nav-link-fill:hover { background: #e0e0e0; transform: translateY(-1px); }
+
+        .page { position: relative; z-index: 1; }
+
+        .pricing-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 5rem 2rem 3rem;
+        }
+        .pricing-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeUp 0.5s ease both;
+        }
+        .pricing-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #ffffff 0%, #666666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+        .pricing-header p {
+            font-size: 1rem;
+            color: #666;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .pricing-card {
+            background: #0a0a0a;
+            border: 1px solid #141414;
+            border-radius: 14px;
+            padding: 2.25rem;
+            position: relative;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            animation: fadeUp 0.5s ease both;
+        }
+        .pricing-card:nth-child(2) { animation-delay: 0.08s; }
+        .pricing-card:hover {
+            transform: translateY(-4px);
+            border-color: #2a2a2a;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+        .pricing-card.premium {
+            border-color: rgba(255,255,255,0.15);
+            background: linear-gradient(160deg, #0a0a0a 0%, #0f0f0f 50%, #0a0a0a 100%);
+        }
+        .pricing-card.premium::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ffffff, transparent);
+            opacity: 0.3;
+            border-radius: 14px 14px 0 0;
+        }
+        .pricing-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            color: #000;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+        .plan-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        .plan-price {
+            font-size: 2.75rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.02em;
+        }
+        .plan-price span {
+            font-size: 0.9rem;
+            color: #555;
+            font-weight: 500;
+        }
+        .plan-desc {
+            color: #555;
+            font-size: 0.825rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.6rem 0;
+            color: #bbb;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #0d0d0d;
+        }
+        .feature-list li:last-child { border-bottom: none; }
+        .feature-list li svg {
+            width: 15px;
+            height: 15px;
+            color: #10b981;
+            flex-shrink: 0;
+        }
+        .feature-list li.disabled {
+            color: #333;
+        }
+        .feature-list li.disabled svg {
+            color: #333;
+        }
+        .plan-cta {
+            width: 100%;
+            padding: 0.85rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: inherit;
+        }
+        .plan-cta.primary {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 20px rgba(255,255,255,0.06);
+        }
+        .plan-cta.primary:hover {
+            background: #e0e0e0;
+            transform: translateY(-1px);
+            box-shadow: 0 0 30px rgba(255,255,255,0.1);
+        }
+        .plan-cta.secondary {
+            background: #0f0f0f;
+            color: #fff;
+            border: 1px solid #1a1a1a;
+        }
+        .plan-cta.secondary:hover {
+            background: #141414;
+            border-color: #2a2a2a;
+            transform: translateY(-1px);
+        }
+        .faq-section {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeUp 0.5s ease 0.15s both;
+        }
+        .faq-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .faq-item {
+            background: #0a0a0a;
+            border: 1px solid #141414;
+            border-radius: 10px;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.15s;
+        }
+        .faq-item:hover { border-color: #1e1e1e; }
+        .faq-question {
+            width: 100%;
+            padding: 1.1rem 1.25rem;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: color 0.15s;
+            font-family: inherit;
+        }
+        .faq-question:hover { color: #ccc; }
+        .faq-question svg {
+            width: 14px;
+            height: 14px;
+            color: #444;
+            transition: transform 0.2s;
+        }
+        .faq-question.active svg { transform: rotate(180deg); color: #888; }
+        .faq-answer {
+            padding: 0 1.25rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            color: #777;
+            font-size: 0.825rem;
+            line-height: 1.7;
+        }
+        .faq-answer.open {
+            padding: 0 1.25rem 1.25rem;
+            max-height: 200px;
+        }
+
+        footer {
+            max-width: 900px; margin: 0 auto;
+            padding: 2rem; text-align: center;
+            border-top: 1px solid #1a1a1a;
+        }
+        footer p { font-size: 0.75rem; color: #444; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .pricing-grid { grid-template-columns: 1fr; }
+            .pricing-container { padding: 5rem 1rem 2rem; }
+            .pricing-header h1 { font-size: 1.75rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+
+    <div class="page">
+        <nav>
+            <div class="nav-inner">
+                <a href="index" class="nav-logo">KOVA</a>
+                <div class="nav-links">
+                    <a href="docs" class="nav-link">Docs</a>
+                    <a href="status" class="nav-link">Status</a>
+                    <a href="dashboard" class="nav-link-fill">Dashboard</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="pricing-container">
+            <div class="pricing-header">
+                <h1>Simple, Transparent Pricing</h1>
+                <p>Start free, scale when you need more</p>
+            </div>
+
+        <div class="pricing-grid">
+            <!-- Free Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">Free</div>
+                <div class="plan-price">$0<span>/month</span></div>
+                <div class="plan-desc">Perfect for indie developers and small projects</div>
+                <ul class="feature-list">
+                    <li><i data-lucide="check"></i> Up to 5 licenses</li>
+                    <li><i data-lucide="check"></i> HWID locking</li>
+                    <li><i data-lucide="check"></i> License expiration</li>
+                    <li><i data-lucide="check"></i> All license types (Trial, Standard, Lifetime, Custom)</li>
+                    <li><i data-lucide="check"></i> C#, C++ & DLL SDKs</li>
+                    <li><i data-lucide="check"></i> Analytics dashboard</li>
+                    <li><i data-lucide="check"></i> Activity log</li>
+                    <li class="disabled"><i data-lucide="x"></i> Unlimited licenses</li>
+                    <li class="disabled"><i data-lucide="x"></i> Priority support</li>
+                </ul>
+                <button class="plan-cta secondary" onclick="window.location.href='signup'">
+                    <i data-lucide="user-plus"></i> Get Started Free
+                </button>
+            </div>
+
+            <!-- Premium Plan -->
+            <div class="pricing-card premium">
+                <div class="pricing-badge">POPULAR</div>
+                <div class="plan-name">Premium</div>
+                <div class="plan-price">$25<span>/month</span></div>
+                <div class="plan-desc">For professional teams and commercial products</div>
+                <ul class="feature-list">
+                    <li><i data-lucide="check"></i> Unlimited licenses</li>
+                    <li><i data-lucide="check"></i> HWID locking</li>
+                    <li><i data-lucide="check"></i> License expiration</li>
+                    <li><i data-lucide="check"></i> All license types (Trial, Standard, Lifetime, Custom)</li>
+                    <li><i data-lucide="check"></i> C#, C++ & DLL SDKs</li>
+                    <li><i data-lucide="check"></i> Analytics dashboard</li>
+                    <li><i data-lucide="check"></i> Activity log</li>
+                    <li><i data-lucide="check"></i> Pre-filled integration code</li>
+                    <li><i data-lucide="check"></i> Priority support</li>
+                </ul>
+                <button class="plan-cta primary" onclick="window.open('https://discord.gg/qs2CJhbdqd','_blank')">
+                    <i data-lucide="star"></i> Upgrade to Premium
+                </button>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Can I change plans anytime?
+                    <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    Yes! You can upgrade from Free to Premium at any time. When upgrading, you'll be charged prorated for the current month. Downgrading isn't available yet, but you can cancel anytime.
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    What happens if I exceed the free plan limit?
+                    <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    On the Free plan, you can create up to 5 licenses total. Once you reach that limit, you'll need to upgrade to Premium to create more licenses. Existing licenses continue to work normally.
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Is there a free trial for Premium?
+                    <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    The Free plan is essentially a free tier with full functionality for up to 5 licenses. There's no time limit, so you can use it as long as you need. If you need more than 5 licenses, that's when Premium becomes necessary.
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    What payment methods do you accept?
+                    <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    We accept all major credit cards (Visa, Mastercard, American Express) and PayPal. Payments are processed securely through Stripe.
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Can I use Kova Auth in commercial software?
+                    <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    Absolutely! Both Free and Premium plans can be used in commercial software. The only difference is the license limit. Premium is recommended for commercial products that need more than 5 licenses.
+                </div>
+            </div>
+        </div>
+        <footer>
+            <p>&copy; 2025 Kova Auth. All rights reserved.</p>
+        </footer>
+    </div>
+    </div>
+
+    <script>
+        function toggleFaq(btn) {
+            const answer = btn.nextElementSibling;
+            const isOpen = answer.classList.contains('open');
+            
+            document.querySelectorAll('.faq-answer.open').forEach(a => {
+                a.classList.remove('open');
+                a.previousElementSibling.classList.remove('active');
+            });
+            
+            if (!isOpen) {
+                answer.classList.add('open');
+                btn.classList.add('active');
+            }
+        }
+        lucide.createIcons();
+    </script>
+</body>
+</html>
